@@ -1428,37 +1428,6 @@ a:hover {
   margin-left: 10px;
 }
 
-.table-selection-badge {
-  background: rgba(59, 130, 246, 0.1);
-  border: 1px solid rgba(59, 130, 246, 0.2);
-  color: #60a5fa;
-  font-size: 11px;
-  font-weight: 700;
-  padding: 3px 10px;
-  border-radius: 20px;
-  margin-left: 12px;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  animation: badgeSlideIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-.selection-badge-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background-color: #3b82f6;
-  box-shadow: 0 0 6px #3b82f6;
-  animation: pulseDot 2s infinite;
-}
-
-@keyframes badgeSlideIn {
-  from { opacity: 0; transform: translateX(-8px); }
-  to { opacity: 1; transform: translateX(0); }
-}
-
 .table-selection-actions {
   display: flex;
   align-items: center;
@@ -1466,17 +1435,18 @@ a:hover {
   flex-wrap: wrap;
 }
 
-.selection-count-text {
-  font-size: 13px;
-  color: #94a3b8;
-  font-weight: 500;
-  margin-right: 6px;
-}
-
 .table-wrapper {
   overflow-x: auto;
   max-height: 650px;
   overflow-y: auto;
+  cursor: grab;
+  user-select: auto;
+  transition: cursor 0.15s ease;
+}
+
+.table-wrapper.dragging {
+  cursor: grabbing;
+  user-select: none;
 }
 
 /* Customização da Barra de Rolagem da Tabela */

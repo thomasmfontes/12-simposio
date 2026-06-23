@@ -150,6 +150,66 @@ export default function AdminDashboard({
 
   const [loading, setLoading] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
+  const tableWrapperRef = React.useRef<HTMLDivElement>(null);
+
+  // Efeito de Grab-to-Scroll para arrastar a tabela com o mouse
+  useEffect(() => {
+    const slider = tableWrapperRef.current;
+    if (!slider) return;
+
+    let isDown = false;
+    let startX = 0;
+    let scrollLeft = 0;
+
+    const handleMouseDown = (e: MouseEvent) => {
+      // Impede o arraste ao interagir com inputs, botões, links, seletores ou SVGs
+      const target = e.target as HTMLElement;
+      if (
+        target.closest("button") ||
+        target.closest("input") ||
+        target.closest("a") ||
+        target.closest(".custom-select-container") ||
+        target.closest("svg")
+      ) {
+        return;
+      }
+
+      isDown = true;
+      slider.classList.add("dragging");
+      startX = e.pageX - slider.offsetLeft;
+      scrollLeft = slider.scrollLeft;
+    };
+
+    const handleMouseLeave = () => {
+      isDown = false;
+      slider.classList.remove("dragging");
+    };
+
+    const handleMouseUp = () => {
+      isDown = false;
+      slider.classList.remove("dragging");
+    };
+
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isDown) return;
+      e.preventDefault();
+      const x = e.pageX - slider.offsetLeft;
+      const walk = (x - startX) * 1.5; // Velocidade de arrasto
+      slider.scrollLeft = scrollLeft - walk;
+    };
+
+    slider.addEventListener("mousedown", handleMouseDown);
+    slider.addEventListener("mouseleave", handleMouseLeave);
+    slider.addEventListener("mouseup", handleMouseUp);
+    slider.addEventListener("mousemove", handleMouseMove);
+
+    return () => {
+      slider.removeEventListener("mousedown", handleMouseDown);
+      slider.removeEventListener("mouseleave", handleMouseLeave);
+      slider.removeEventListener("mouseup", handleMouseUp);
+      slider.removeEventListener("mousemove", handleMouseMove);
+    };
+  }, []);
 
   // Busca dados atualizados da API ao alterar filtros
   useEffect(() => {
@@ -591,12 +651,6 @@ export default function AdminDashboard({
           <div className="table-header-title">
             Lista de Inscritos
             <span className="table-counter-badge">{inscritos.length}</span>
-            {selectedIds.size > 0 && (
-              <span className="table-selection-badge">
-                <span className="selection-badge-dot"></span>
-                {selectedIds.size} selecionado{selectedIds.size > 1 ? "s" : ""}
-              </span>
-            )}
           </div>
 
           <div className="table-selection-actions">
@@ -634,7 +688,7 @@ export default function AdminDashboard({
           </div>
         </div>
 
-        <div className="table-wrapper">
+        <div className="table-wrapper" ref={tableWrapperRef}>
           {loading ? (
             <div className="table-status-message">
               <div className="spinner-loader"></div>

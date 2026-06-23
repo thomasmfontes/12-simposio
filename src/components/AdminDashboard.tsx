@@ -745,9 +745,12 @@ export default function AdminDashboard({
                       </td>
                       <td>
                         {i.fl_graduado === 1 ? (
-                          <span className="badge-graduado sim">
-                            Sim <span className="degree-sub">({i.ds_curso_graduacao})</span>
-                          </span>
+                          <div style={{ display: "flex", flexDirection: "column", gap: "4px", alignItems: "flex-start" }}>
+                            <span className="badge-graduado sim">Sim</span>
+                            {i.ds_curso_graduacao && (
+                              <span className="degree-sub">{i.ds_curso_graduacao}</span>
+                            )}
+                          </div>
                         ) : (
                           <span className="badge-graduado nao">Não</span>
                         )}
@@ -832,11 +835,16 @@ export default function AdminDashboard({
                           {i.nm_cidade} ({i.nm_pais})
                         </span>
                       </div>
-                      <div className="mobile-card-row">
-                        <span className="row-label">Graduado:</span>
-                        <span className="row-value">
+                      <div className="mobile-card-row" style={{ alignItems: "flex-start" }}>
+                        <span className="row-label" style={{ marginTop: "4px" }}>Graduado:</span>
+                        <span className="row-value" style={{ display: "flex", flexDirection: "column", gap: "4px", alignItems: "flex-end" }}>
                           {i.fl_graduado === 1 ? (
-                            <span className="badge-graduado sim">Sim <span className="degree-sub">({i.ds_curso_graduacao})</span></span>
+                            <>
+                              <span className="badge-graduado sim">Sim</span>
+                              {i.ds_curso_graduacao && (
+                                <span className="degree-sub" style={{ textAlign: "right" }}>{i.ds_curso_graduacao}</span>
+                              )}
+                            </>
                           ) : (
                             <span className="badge-graduado nao">Não</span>
                           )}

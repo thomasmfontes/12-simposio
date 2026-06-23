@@ -39,9 +39,9 @@ export default function RegisterForm({ lang, onSuccess }: RegisterFormProps) {
 
   // Fontes de informação (Como ficou sabendo)
   const [comoSoube, setComoSoube] = useState<{ [key: string]: boolean }>({
-    Vip: false,
-    Embaixadores: false,
-    "Instagram PremierVet": false,
+    "Promotor Técnico": false,
+    "Alunos Embaixadores Premierpet": false,
+    "Redes Sociais (Instagram PremierVet, YouTube, TikTok, Linkedin)": false,
     "Professor(a)": false,
     "Outros meios de comunicação": false,
   });
@@ -543,7 +543,7 @@ export default function RegisterForm({ lang, onSuccess }: RegisterFormProps) {
                 checked={modalidade === "Online"}
                 onChange={() => setModalidade("Online")}
               />
-              ON-LINE
+              ONLINE
             </label>
             <label className="radio-option">
               <input

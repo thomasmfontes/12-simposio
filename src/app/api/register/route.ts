@@ -226,11 +226,14 @@ export async function POST(request: Request) {
       message: "Inscrição realizada com sucesso!",
     });
   } catch (error) {
-    console.error("Erro no processamento da inscrição:", error);
+    const errMsg = error instanceof Error ? error.message : String(error);
+    const errStack = error instanceof Error ? error.stack : undefined;
+    console.error("Erro no processamento da inscrição:", errMsg);
+    if (errStack) console.error("Stack:", errStack);
     return NextResponse.json(
       {
-        error:
-          "Ocorreu um erro interno no servidor ao tentar registrar a inscrição. Por favor, tente novamente mais tarde.",
+        error: "Ocorreu um erro interno no servidor ao tentar registrar a inscrição. Por favor, tente novamente mais tarde.",
+        detail: errMsg, // temporário para debug
       },
       { status: 500 },
     );

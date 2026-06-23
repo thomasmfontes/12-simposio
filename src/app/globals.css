@@ -2155,3 +2155,217 @@ tr.row-selected td {
     display: table !important;
   }
 }
+
+/* --- LOGIN PAGE PREMIUM UX/UI --- */
+.login-card {
+  position: relative;
+  z-index: 2;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 
+    0 24px 60px rgba(0, 0, 0, 0.6), 
+    inset 0 1px 1px rgba(255, 255, 255, 0.05),
+    0 0 40px rgba(59, 130, 246, 0.05) !important;
+  overflow: hidden;
+  background: rgba(10, 20, 42, 0.75) !important;
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+}
+
+.login-icon-header {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: rgba(59, 130, 246, 0.1);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  color: #60a5fa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 24px auto;
+  box-shadow: 0 0 20px rgba(59, 130, 246, 0.15);
+}
+
+.login-icon-header svg {
+  width: 22px;
+  height: 22px;
+}
+
+.login-card label {
+  color: #94a3b8 !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.08em !important;
+  text-transform: uppercase !important;
+  margin-bottom: 8px !important;
+}
+
+/* Custom Autofill styling for dark mode inputs to prevent white background flash/fill */
+.login-card .input-field:-webkit-autofill,
+.login-card .input-field:-webkit-autofill:hover, 
+.login-card .input-field:-webkit-autofill:focus, 
+.login-card .input-field:-webkit-autofill:active {
+  -webkit-text-fill-color: #ffffff !important;
+  -webkit-box-shadow: 0 0 0 1000px #131d35 inset !important;
+  box-shadow: 0 0 0 1000px #131d35 inset !important;
+  caret-color: #ffffff !important;
+}
+
+/* Premium Login Input Styling */
+.login-card .input-field {
+  background-color: rgba(255, 255, 255, 0.02) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  color: #ffffff !important;
+  caret-color: #3b82f6 !important; /* Cursor de digitação azul brilhante */
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  font-size: 14px !important;
+  border-radius: 8px !important;
+  padding: 12px 16px 12px 42px !important;
+}
+
+.login-card .input-field:hover {
+  border-color: rgba(255, 255, 255, 0.2) !important;
+  background-color: rgba(255, 255, 255, 0.04) !important;
+}
+
+.login-card .input-field:focus {
+  background-color: rgba(0, 0, 0, 0.3) !important;
+  border-color: #3b82f6 !important;
+  box-shadow: 0 0 0 1px #3b82f6, 0 0 14px rgba(59, 130, 246, 0.25) !important;
+}
+
+/* Icon layout inside login input */
+.login-card .input-with-icon {
+  position: relative;
+  width: 100%;
+}
+
+.login-card .input-with-icon .input-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  color: rgba(255, 255, 255, 0.35);
+  pointer-events: none;
+  z-index: 10;
+  transition: color 0.2s ease;
+}
+
+.login-card .input-field:focus + .input-icon,
+.login-card .input-with-icon:focus-within .input-icon {
+  color: #3b82f6 !important;
+}
+
+/* Submit Button login styling overrides */
+.login-submit-btn {
+  background-color: #2563eb !important;
+  border-color: #2563eb !important;
+  color: #ffffff !important;
+  font-family: var(--font-display) !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.06em !important;
+  border-radius: 8px !important;
+  height: 46px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3) !important;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  cursor: pointer !important;
+  width: 100%;
+}
+
+.login-submit-btn:hover:not(:disabled) {
+  background-color: #3b82f6 !important;
+  border-color: #3b82f6 !important;
+  box-shadow: 0 6px 20px rgba(37, 99, 235, 0.45) !important;
+  transform: translateY(-1px) !important;
+}
+
+.login-submit-btn:active:not(:disabled) {
+  transform: translateY(1px) !important;
+}
+
+.login-submit-btn:disabled {
+  opacity: 0.5 !important;
+  cursor: not-allowed !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* Caixa de Erro Premium */
+.error-message-box {
+  background: rgba(239, 68, 68, 0.1) !important;
+  border: 1px solid rgba(239, 68, 68, 0.25) !important;
+  color: #f87171 !important;
+  padding: 10px 14px !important;
+  border-radius: 8px !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  margin-bottom: 20px !important;
+  box-sizing: border-box;
+}
+
+.error-icon {
+  width: 16px;
+  height: 16px;
+  color: #ef4444;
+  flex-shrink: 0;
+}
+
+/* Glowing Background Orbs */
+.login-bg-glow {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(90px);
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.18;
+}
+
+.login-bg-glow-1 {
+  width: 350px;
+  height: 350px;
+  background: radial-gradient(circle, rgba(59, 130, 246, 0.4) 0%, rgba(37, 99, 235, 0) 70%);
+  top: 15%;
+  left: 20%;
+  animation: floatGlow1 8s ease-in-out infinite;
+}
+
+.login-bg-glow-2 {
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, rgba(193, 234, 106, 0.25) 0%, rgba(193, 234, 106, 0) 70%);
+  bottom: 15%;
+  right: 20%;
+  animation: floatGlow2 8s ease-in-out infinite;
+}
+
+@keyframes floatGlow1 {
+  0% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-20px) scale(1.1); }
+  100% { transform: translateY(0) scale(1); }
+}
+
+@keyframes floatGlow2 {
+  0% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(20px) scale(1.1); }
+  100% { transform: translateY(0) scale(1); }
+}
+
+.spinner-loader-small {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin-right: 4px;
+}

@@ -34,6 +34,104 @@ interface AdminDashboardProps {
   initialCidades: string[];
 }
 
+interface CustomSelectProps {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  options: { value: string; label: string }[];
+  placeholder: string;
+  icon: React.ReactNode;
+}
+
+function CustomSelect({
+  label,
+  value,
+  onChange,
+  options,
+  placeholder,
+  icon,
+}: CustomSelectProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = React.useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const selectedOption = options.find((opt) => opt.value === value);
+
+  return (
+    <div className="custom-select-container" ref={dropdownRef}>
+      <label className="custom-select-label">{label}</label>
+      <div
+        className={`custom-select-trigger ${isOpen ? "open" : ""}`}
+        onClick={() => setIsOpen(!isOpen)}
+      >
+        <div className="custom-select-trigger-left">
+          {icon}
+          <span className="custom-select-text">
+            {selectedOption ? selectedOption.label : placeholder}
+          </span>
+        </div>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          className={`custom-select-arrow ${isOpen ? "open" : ""}`}
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          strokeWidth={2.2}
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+        </svg>
+      </div>
+
+      {isOpen && (
+        <ul className="custom-select-options">
+          {options.map((opt) => (
+            <li
+              key={opt.value}
+              className={`custom-select-option ${
+                opt.value === value ? "selected" : ""
+              }`}
+              onClick={() => {
+                onChange(opt.value);
+                setIsOpen(false);
+              }}
+            >
+              {opt.label}
+              {opt.value === value && (
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="check-icon"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={3}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M5 13l4 4L19 7"
+                  />
+                </svg>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
 export default function AdminDashboard({
   initialInscritos,
   initialMetrics,
@@ -324,15 +422,19 @@ export default function AdminDashboard({
   };
 
   return (
-    <div className="container" style={{ animation: "fadeIn 0.3s ease-out" }}>
+    <div className="container" style={{ animation: "fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1)" }}>
       {/* Cabeçalho */}
       <div className="admin-header">
         <div className="admin-header-title">
+          <div className="admin-title-badge">PAINEL DE CONTROLE</div>
           <h1>Painel Administrativo</h1>
-          <p>Gerenciamento de inscritos no 12º Simpósio</p>
+          <p>Gerenciamento e monitoramento de inscritos no 12º Simpósio</p>
         </div>
         <div className="admin-actions">
-          <button className="btn-outline" onClick={handleLogout}>
+          <button className="btn-outline btn-logout" onClick={handleLogout}>
+            <svg xmlns="http://www.w3.org/2000/svg" className="btn-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+            </svg>
             Sair do Painel
           </button>
         </div>
@@ -340,32 +442,46 @@ export default function AdminDashboard({
 
       {/* Grid de Métricas Gerais */}
       <div className="metrics-grid">
-        <div className="metric-card">
-          <span className="metric-title">Geral Inscritos</span>
+        {/* Total */}
+        <div className="metric-card metric-total">
+          <div className="metric-card-header">
+            <span className="metric-title">Geral Inscritos</span>
+            <div className="metric-icon-wrapper">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+              </svg>
+            </div>
+          </div>
           <span className="metric-value">{metrics.total}</span>
-          <span className="metric-subtitle">Total geral de cadastros</span>
+          <span className="metric-subtitle">Total de inscrições recebidas</span>
         </div>
-        <div
-          className="metric-card"
-          style={{ borderLeft: "4px solid #10b981" }}
-        >
-          <span className="metric-title">Presencial</span>
-          <span className="metric-value" style={{ color: "#10b981" }}>
-            {metrics.presencial}
-          </span>
-          <span className="metric-subtitle">
-            Presenças confirmadas no local
-          </span>
+
+        {/* Presencial */}
+        <div className="metric-card metric-presencial">
+          <div className="metric-card-header">
+            <span className="metric-title">Presencial</span>
+            <div className="metric-icon-wrapper">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+              </svg>
+            </div>
+          </div>
+          <span className="metric-value">{metrics.presencial}</span>
+          <span className="metric-subtitle">Vagas presenciais reservadas</span>
         </div>
-        <div
-          className="metric-card"
-          style={{ borderLeft: "4px solid #3b82f6" }}
-        >
-          <span className="metric-title">Online</span>
-          <span className="metric-value" style={{ color: "#3b82f6" }}>
-            {metrics.online}
-          </span>
-          <span className="metric-subtitle">Visualizações por streaming</span>
+
+        {/* Online */}
+        <div className="metric-card metric-online">
+          <div className="metric-card-header">
+            <span className="metric-title">Online</span>
+            <div className="metric-icon-wrapper">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+              </svg>
+            </div>
+          </div>
+          <span className="metric-value">{metrics.online}</span>
+          <span className="metric-subtitle">Inscritos para a transmissão ao vivo</span>
         </div>
       </div>
 
@@ -375,67 +491,83 @@ export default function AdminDashboard({
           {/* Busca por Nome/Email */}
           <div className="input-field-wrapper">
             <label>Busca Textual</label>
-            <input
-              type="text"
-              className="input-field"
-              placeholder="Nome ou E-mail..."
-              value={filterSearch}
-              onChange={(e) => setFilterSearch(e.target.value)}
-            />
+            <div className="input-with-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" className="input-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+              <input
+                type="text"
+                className="input-field"
+                placeholder="Nome ou E-mail..."
+                value={filterSearch}
+                onChange={(e) => setFilterSearch(e.target.value)}
+              />
+            </div>
           </div>
 
           {/* Filtro Cidade */}
-          <div className="input-field-wrapper">
-            <label>Cidade</label>
-            <select
-              className="input-field"
-              value={filterCidade}
-              onChange={(e) => setFilterCidade(e.target.value)}
-              style={{ appearance: "auto" }}
-            >
-              <option value="">Todas as cidades</option>
-              {cidades.map((c) => (
-                <option key={c} value={c}>
-                  {c}
-                </option>
-              ))}
-            </select>
-          </div>
+          <CustomSelect
+            label="Cidade"
+            value={filterCidade}
+            onChange={setFilterCidade}
+            placeholder="Todas as cidades"
+            options={[
+              { value: "", label: "Todas as cidades" },
+              ...cidades.map((c) => ({ value: c, label: c })),
+            ]}
+            icon={
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+            }
+          />
 
           {/* Filtro Modalidade */}
-          <div className="input-field-wrapper">
-            <label>Modalidade</label>
-            <select
-              className="input-field"
-              value={filterModalidade}
-              onChange={(e) => setFilterModalidade(e.target.value)}
-              style={{ appearance: "auto" }}
-            >
-              <option value="">Todas</option>
-              <option value="Presencial">Presencial</option>
-              <option value="Online">Online</option>
-            </select>
-          </div>
+          <CustomSelect
+            label="Modalidade"
+            value={filterModalidade}
+            onChange={setFilterModalidade}
+            placeholder="Todas"
+            options={[
+              { value: "", label: "Todas" },
+              { value: "Presencial", label: "Presencial" },
+              { value: "Online", label: "Online" },
+            ]}
+            icon={
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+              </svg>
+            }
+          />
 
           {/* Filtro Período de Inscrição */}
           <div className="input-field-wrapper">
             <label>Período de Inscrição</label>
             <div className="date-range-inputs">
-              <input
-                type="date"
-                className="input-field"
-                value={filterDataInicio}
-                onChange={(e) => setFilterDataInicio(e.target.value)}
-              />
-              <span style={{ color: "var(--text-muted)", fontSize: "12px" }}>
-                até
-              </span>
-              <input
-                type="date"
-                className="input-field"
-                value={filterDataFim}
-                onChange={(e) => setFilterDataFim(e.target.value)}
-              />
+              <div className="input-with-icon date-input-wrapper">
+                <svg xmlns="http://www.w3.org/2000/svg" className="input-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <input
+                  type="date"
+                  className="input-field date-input"
+                  value={filterDataInicio}
+                  onChange={(e) => setFilterDataInicio(e.target.value)}
+                />
+              </div>
+              <span className="date-separator">até</span>
+              <div className="input-with-icon date-input-wrapper">
+                <svg xmlns="http://www.w3.org/2000/svg" className="input-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <input
+                  type="date"
+                  className="input-field date-input"
+                  value={filterDataFim}
+                  onChange={(e) => setFilterDataFim(e.target.value)}
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -445,13 +577,7 @@ export default function AdminDashboard({
           filterModalidade ||
           filterDataInicio ||
           filterDataFim) && (
-          <div
-            style={{
-              marginTop: "16px",
-              display: "flex",
-              justifyContent: "flex-end",
-            }}
-          >
+          <div className="filter-actions-bar">
             <button className="filter-clear-btn" onClick={handleClearFilters}>
               Limpar Filtros
             </button>
@@ -463,43 +589,46 @@ export default function AdminDashboard({
       <div className="table-card">
         <div className="table-header-bar">
           <div className="table-header-title">
-            Lista de Inscritos ({inscritos.length} exibidos)
+            Lista de Inscritos
+            <span className="table-counter-badge">{inscritos.length}</span>
+            {selectedIds.size > 0 && (
+              <span className="table-selection-badge">
+                <span className="selection-badge-dot"></span>
+                {selectedIds.size} selecionado{selectedIds.size > 1 ? "s" : ""}
+              </span>
+            )}
           </div>
 
           <div className="table-selection-actions">
-            {selectedIds.size > 0 && (
-              <span
-                style={{
-                  fontSize: "13px",
-                  color: "var(--text-muted)",
-                  marginRight: "8px",
-                }}
-              >
-                {selectedIds.size} selecionado(s)
-              </span>
-            )}
-
             {/* Exportar CSV */}
-            <button className="btn-outline" onClick={handleExportCSV}>
+            <button className="btn-outline btn-with-icon" onClick={handleExportCSV}>
+              <svg xmlns="http://www.w3.org/2000/svg" className="btn-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+              </svg>
               Exportar CSV
             </button>
 
             {/* Gerar Crachás dos Selecionados */}
             <button
-              className="btn-primary"
+              className="btn-primary btn-with-icon btn-badge-primary"
               onClick={() => handleGenerateBadges(true)}
               disabled={selectedIds.size === 0}
-              style={{ opacity: selectedIds.size === 0 ? 0.6 : 1 }}
             >
+              <svg xmlns="http://www.w3.org/2000/svg" className="btn-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.333 0 4 .667 4 2v1H5v-1c0-1.333 2.667-2 4-2z" />
+              </svg>
               Crachás Selecionados ({selectedIds.size})
             </button>
 
             {/* Gerar Crachás de Todos os Filtrados */}
             <button
-              className="btn-outline"
+              className="btn-outline btn-with-icon"
               onClick={() => handleGenerateBadges(false)}
               disabled={inscritos.length === 0}
             >
+              <svg xmlns="http://www.w3.org/2000/svg" className="btn-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+              </svg>
               Crachás Todos ({inscritos.length})
             </button>
           </div>
@@ -507,31 +636,20 @@ export default function AdminDashboard({
 
         <div className="table-wrapper">
           {loading ? (
-            <div
-              style={{
-                padding: "40px",
-                textAlign: "center",
-                color: "var(--text-muted)",
-              }}
-            >
-              Carregando dados...
+            <div className="table-status-message">
+              <div className="spinner-loader"></div>
+              <span>Carregando dados...</span>
             </div>
           ) : inscritos.length === 0 ? (
-            <div
-              style={{
-                padding: "40px",
-                textAlign: "center",
-                color: "var(--text-muted)",
-              }}
-            >
-              Nenhum participante inscrito com os filtros aplicados.
+            <div className="table-status-message">
+              <span>Nenhum participante inscrito com os filtros aplicados.</span>
             </div>
           ) : (
             <>
               <table className="desktop-table">
                 <thead>
                   <tr>
-                    <th style={{ width: "40px", textAlign: "center" }}>
+                    <th style={{ width: "50px", textAlign: "center" }}>
                       <input
                         type="checkbox"
                         className="table-checkbox"
@@ -547,12 +665,12 @@ export default function AdminDashboard({
                     <th>CRMV</th>
                     <th>Modalidade</th>
                     <th>Data Cadastro</th>
-                    <th style={{ textAlign: "center" }}>Ações</th>
+                    <th style={{ textAlign: "center", width: "100px" }}>Ações</th>
                   </tr>
                 </thead>
                 <tbody>
                   {inscritos.map((i) => (
-                    <tr key={i.id_inscrito}>
+                    <tr key={i.id_inscrito} className={selectedIds.has(i.id_inscrito) ? "row-selected" : ""}>
                       <td style={{ textAlign: "center" }}>
                         <input
                           type="checkbox"
@@ -561,24 +679,26 @@ export default function AdminDashboard({
                           onChange={() => handleSelectRow(i.id_inscrito)}
                         />
                       </td>
-                      <td style={{ fontWeight: "600", color: "#ffffff" }}>
+                      <td className="cell-highlight-text">
                         {i.nm_inscrito}
                       </td>
-                      <td>{i.ds_email}</td>
+                      <td className="cell-email">{i.ds_email}</td>
                       <td>{i.nu_telefone}</td>
                       <td>
-                        {i.nm_cidade} ({i.nm_pais})
+                        <span className="location-text">
+                          {i.nm_cidade} <span className="country-sub">{i.nm_pais}</span>
+                        </span>
                       </td>
                       <td>
                         {i.fl_graduado === 1 ? (
                           <span className="badge-graduado sim">
-                            Sim ({i.ds_curso_graduacao})
+                            Sim <span className="degree-sub">({i.ds_curso_graduacao})</span>
                           </span>
                         ) : (
-                          <span className="badge-graduado">Não</span>
+                          <span className="badge-graduado nao">Não</span>
                         )}
                       </td>
-                      <td>{i.ds_crmv || "-"}</td>
+                      <td>{i.ds_crmv || <span className="text-empty-dash">-</span>}</td>
                       <td>
                         <span
                           className={`badge-modalidade ${
@@ -587,22 +707,30 @@ export default function AdminDashboard({
                               : "online"
                           }`}
                         >
+                          <span className="badge-dot"></span>
                           {i.ds_modalidade}
                         </span>
                       </td>
-                      <td
-                        style={{ fontSize: "13px", color: "var(--text-muted)" }}
-                      >
-                        {new Date(i.dt_cadastro).toLocaleString("pt-BR")}
+                      <td className="cell-date">
+                        {new Date(i.dt_cadastro).toLocaleString("pt-BR", {
+                          day: "2-digit",
+                          month: "2-digit",
+                          year: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit"
+                        })}
                       </td>
                       <td style={{ textAlign: "center" }}>
                         <button
-                          className="btn-danger-outline"
+                          className="btn-danger-icon"
+                          title="Excluir Participante"
                           onClick={() =>
                             handleDelete(i.id_inscrito, i.nm_inscrito)
                           }
                         >
-                          Excluir
+                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
                         </button>
                       </td>
                     </tr>
@@ -612,7 +740,7 @@ export default function AdminDashboard({
 
               <div className="mobile-cards-list">
                 {inscritos.map((i) => (
-                  <div key={i.id_inscrito} className="mobile-inscrito-card">
+                  <div key={i.id_inscrito} className={`mobile-inscrito-card ${selectedIds.has(i.id_inscrito) ? "card-selected" : ""}`}>
                     <div className="mobile-card-header">
                       <div className="mobile-card-header-left">
                         <input
@@ -630,6 +758,7 @@ export default function AdminDashboard({
                             : "online"
                         }`}
                       >
+                        <span className="badge-dot"></span>
                         {i.ds_modalidade}
                       </span>
                     </div>
@@ -637,7 +766,7 @@ export default function AdminDashboard({
                     <div className="mobile-card-body">
                       <div className="mobile-card-row">
                         <span className="row-label">E-mail:</span>
-                        <span className="row-value">{i.ds_email}</span>
+                        <span className="row-value cell-email">{i.ds_email}</span>
                       </div>
                       <div className="mobile-card-row">
                         <span className="row-label">Telefone:</span>
@@ -652,7 +781,11 @@ export default function AdminDashboard({
                       <div className="mobile-card-row">
                         <span className="row-label">Graduado:</span>
                         <span className="row-value">
-                          {i.fl_graduado === 1 ? `Sim (${i.ds_curso_graduacao})` : "Não"}
+                          {i.fl_graduado === 1 ? (
+                            <span className="badge-graduado sim">Sim <span className="degree-sub">({i.ds_curso_graduacao})</span></span>
+                          ) : (
+                            <span className="badge-graduado nao">Não</span>
+                          )}
                         </span>
                       </div>
                       {i.ds_crmv && (
@@ -667,7 +800,7 @@ export default function AdminDashboard({
                       </div>
                       <div className="mobile-card-row">
                         <span className="row-label">Cadastro:</span>
-                        <span className="row-value">
+                        <span className="row-value cell-date">
                           {new Date(i.dt_cadastro).toLocaleString("pt-BR")}
                         </span>
                       </div>
@@ -675,11 +808,14 @@ export default function AdminDashboard({
 
                     <div className="mobile-card-actions">
                       <button
-                        className="btn-danger-outline"
-                        style={{ width: "100%" }}
+                        className="btn-danger-outline btn-with-icon"
+                        style={{ width: "100%", justifyContent: "center" }}
                         onClick={() => handleDelete(i.id_inscrito, i.nm_inscrito)}
                       >
-                        Excluir
+                        <svg xmlns="http://www.w3.org/2000/svg" className="btn-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                        Excluir Registro
                       </button>
                     </div>
                   </div>

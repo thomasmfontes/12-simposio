@@ -1,7 +1,11 @@
 import Database from "better-sqlite3";
 import path from "path";
 
-const dbPath = path.join(process.cwd(), "database.db");
+const isVercel = process.env.VERCEL === "1";
+const dbPath = isVercel
+  ? path.join("/tmp", "database.db")
+  : path.join(process.cwd(), "database.db");
+
 const db = new Database(dbPath);
 
 // Configura modo WAL para melhor concorrência e escrita

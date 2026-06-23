@@ -9,12 +9,17 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@leenguyen/react-flip-clock-countdown": "^1.7.2",
+    "better-sqlite3": "^12.10.0",
+    "jspdf": "^4.2.1",
     "next": "16.2.9",
     "react": "19.2.4",
-    "react-dom": "19.2.4"
+    "react-dom": "19.2.4",
+    "resend": "^6.12.4"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@types/better-sqlite3": "^7.6.13",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",

@@ -122,10 +122,17 @@ export async function POST(request: Request) {
 
     // 2. Validação contra duplicados
     const emailClean = ds_email.trim().toLowerCase();
-    const duplicateCheck = db.prepare(
-      "SELECT id_inscrito FROM t_inscritos WHERE ds_email = ?",
-    );
-    const existing = duplicateCheck.get(emailClean);
+    const { data: existing, error: checkError } = await db
+      .from("t_inscritos")
+      .select("id_inscrito")
+      .eq("ds_email", emailClean)
+      .maybeSingle();
+
+    if (checkError) {
+      console.error("Erro ao verificar duplicados no Supabase:", checkError);
+      throw checkError;
+    }
+
     if (existing) {
       return NextResponse.json(
         { error: "Este e-mail já foi cadastrado para o evento." },
@@ -135,41 +142,29 @@ export async function POST(request: Request) {
 
     // 3. Inserção no Banco de Dados
     const dt_cadastro = new Date().toISOString();
-    const insertStmt = db.prepare(`
-      INSERT INTO t_inscritos (
-        nm_inscrito,
+    const { error: insertError } = await db
+      .from("t_inscritos")
+      .insert({
+        nm_inscrito: nm_inscrito.trim(),
         dt_nascimento,
-        ds_email,
-        nu_telefone,
-        nm_pais,
-        nm_cidade,
-        fl_graduado,
-        ds_curso_graduacao,
-        ds_crmv,
+        ds_email: emailClean,
+        nu_telefone: nu_telefone.trim(),
+        nm_pais: nm_pais.trim(),
+        nm_cidade: nm_cidade.trim(),
+        fl_graduado: isGraduado ? 1 : 0,
+        ds_curso_graduacao: isGraduado ? ds_curso_graduacao.trim() : null,
+        ds_crmv: isGraduado && ds_crmv ? ds_crmv.trim() : null,
         ds_como_soube,
-        ds_como_soube_outro,
+        ds_como_soube_outro: ds_como_soube_outro ? ds_como_soube_outro.trim() : null,
         ds_modalidade,
-        fl_lgpd_aceite,
-        dt_cadastro
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `);
+        fl_lgpd_aceite: fl_lgpd_aceite ? 1 : 0,
+        dt_cadastro,
+      });
 
-    insertStmt.run(
-      nm_inscrito.trim(),
-      dt_nascimento,
-      emailClean,
-      nu_telefone.trim(),
-      nm_pais.trim(),
-      nm_cidade.trim(),
-      isGraduado ? 1 : 0,
-      isGraduado ? ds_curso_graduacao.trim() : null,
-      isGraduado && ds_crmv ? ds_crmv.trim() : null,
-      ds_como_soube,
-      ds_como_soube_outro ? ds_como_soube_outro.trim() : null,
-      ds_modalidade,
-      fl_lgpd_aceite ? 1 : 0,
-      dt_cadastro,
-    );
+    if (insertError) {
+      console.error("Erro ao inserir participante no Supabase:", insertError);
+      throw insertError;
+    }
 
     // 4. Envio de E-mail via Resend (Processo assíncrono não-bloqueante)
     const apiKey = process.env.RESEND_API_KEY;

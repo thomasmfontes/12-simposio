@@ -9,39 +9,28 @@ export default async function AdminPage() {
     redirect("/admin/login");
   }
 
-  // 2. Consulta as métricas iniciais
-  const totalCount = db
-    .prepare("SELECT COUNT(*) as count FROM t_inscritos")
-    .get() as { count: number };
-  const presencialCount = db
-    .prepare(
-      "SELECT COUNT(*) as count FROM t_inscritos WHERE ds_modalidade = 'Presencial'",
-    )
-    .get() as { count: number };
-  const onlineCount = db
-    .prepare(
-      "SELECT COUNT(*) as count FROM t_inscritos WHERE ds_modalidade = 'Online'",
-    )
-    .get() as { count: number };
+  // 2. Consulta as métricas iniciais, inscritos e cidades em paralelo
+  const [totalRes, presencialRes, onlineRes, inscritosRes, citiesRes] = await Promise.all([
+    db.from("t_inscritos").select("*", { count: "exact", head: true }),
+    db.from("t_inscritos").select("*", { count: "exact", head: true }).eq("ds_modalidade", "Presencial"),
+    db.from("t_inscritos").select("*", { count: "exact", head: true }).eq("ds_modalidade", "Online"),
+    db.from("t_inscritos").select("*").order("dt_cadastro", { ascending: false }),
+    db.from("t_inscritos").select("nm_cidade"),
+  ]);
 
   const initialMetrics = {
-    total: totalCount?.count || 0,
-    presencial: presencialCount?.count || 0,
-    online: onlineCount?.count || 0,
+    total: totalRes.count || 0,
+    presencial: presencialRes.count || 0,
+    online: onlineRes.count || 0,
   };
 
-  // 3. Consulta a lista inicial completa de inscritos (ordenado por cadastro mais recente)
-  const initialInscritos = db
-    .prepare("SELECT * FROM t_inscritos ORDER BY dt_cadastro DESC")
-    .all() as InscritoData[];
+  // 3. Consulta a lista inicial completa de inscritos
+  const initialInscritos = (inscritosRes.data || []) as InscritoData[];
 
   // 4. Carrega a lista de cidades únicas registradas para o filtro
-  const citiesList = db
-    .prepare(
-      "SELECT DISTINCT nm_cidade FROM t_inscritos ORDER BY nm_cidade ASC",
-    )
-    .all() as { nm_cidade: string }[];
-  const initialCidades = citiesList.map((c) => c.nm_cidade);
+  const initialCidades = Array.from(
+    new Set((citiesRes.data || []).map((c: { nm_cidade: string }) => c.nm_cidade))
+  ).sort();
 
   return (
     <div className="admin-layout">

@@ -1,36 +1,13 @@
-import Database from "better-sqlite3";
-import path from "path";
+import { createClient } from "@supabase/supabase-js";
 
-const isVercel = process.env.VERCEL === "1";
-const dbPath = isVercel
-  ? path.join("/tmp", "database.db")
-  : path.join(process.cwd(), "database.db");
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL || "https://placeholder-url.supabase.co";
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "placeholder-key";
 
-const db = new Database(dbPath);
+if ((!process.env.NEXT_PUBLIC_SUPABASE_URL && !process.env.SUPABASE_URL) || (!process.env.SUPABASE_SERVICE_ROLE_KEY && !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)) {
+  console.warn("Warning: Supabase credentials are not set. Database queries will fail at runtime.");
+}
 
-// Configura modo WAL para melhor concorrência e escrita
-db.pragma("journal_mode = WAL");
-
-// Inicializa a tabela caso não exista
-db.exec(`
-  CREATE TABLE IF NOT EXISTS t_inscritos (
-    id_inscrito INTEGER PRIMARY KEY AUTOINCREMENT,
-    nm_inscrito TEXT NOT NULL,
-    dt_nascimento TEXT NOT NULL,
-    ds_email TEXT NOT NULL UNIQUE,
-    nu_telefone TEXT NOT NULL,
-    nm_pais TEXT NOT NULL,
-    nm_cidade TEXT NOT NULL,
-    fl_graduado INTEGER NOT NULL, -- 1 = Sim, 0 = Não
-    ds_curso_graduacao TEXT,
-    ds_crmv TEXT,
-    ds_como_soube TEXT NOT NULL,
-    ds_como_soube_outro TEXT,
-    ds_modalidade TEXT NOT NULL, -- Presencial / Online
-    fl_lgpd_aceite INTEGER NOT NULL, -- 1 = Sim
-    dt_cadastro TEXT NOT NULL
-  );
-`);
+export const supabase = createClient(supabaseUrl, supabaseKey);
 
 export interface Inscrito {
   id_inscrito?: number;
@@ -50,4 +27,4 @@ export interface Inscrito {
   dt_cadastro: string;
 }
 
-export default db;
+export default supabase;

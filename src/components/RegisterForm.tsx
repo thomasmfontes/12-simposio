@@ -569,7 +569,7 @@ export default function RegisterForm({ lang, onSuccess }: RegisterFormProps) {
           />
           <span>
             {t.form.lgpdText}{" "}
-            <a href="https://premierpet.com.br/politica-de-privacidade/" target="_blank" rel="noopener noreferrer">
+            <a href="https://premierpet.com.br/privacidade/" target="_blank" rel="noopener noreferrer">
               {t.form.lgpdLink}
             </a>
           </span>

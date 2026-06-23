@@ -32,6 +32,14 @@ export default function AdminLogin() {
 
   return (
     <div className="admin-layout" style={{ position: "relative", overflow: "hidden" }}>
+      {/* Botão de Voltar para Landing Page */}
+      <a href="/" className="back-link">
+        <svg xmlns="http://www.w3.org/2000/svg" className="back-link-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+        </svg>
+        Voltar para o site
+      </a>
+
       {/* Elementos Decorativos de Fundo (Glow Orbs) */}
       <div className="login-bg-glow login-bg-glow-1"></div>
       <div className="login-bg-glow login-bg-glow-2"></div>

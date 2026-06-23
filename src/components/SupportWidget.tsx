@@ -9,19 +9,7 @@ interface SupportWidgetProps {
 
 export default function SupportWidget({ lang }: SupportWidgetProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [message, setMessage] = useState("");
   const t = translations[lang];
-
-  const handleStartChat = (e: React.FormEvent) => {
-    e.preventDefault();
-    const phone = "5511999999999"; // Telefone de suporte padrão (pode ser configurado)
-    const text = encodeURIComponent(
-      message || t.support.waText,
-    );
-    window.open(`https://wa.me/${phone}?text=${text}`, "_blank");
-    setMessage("");
-    setIsOpen(false);
-  };
 
   return (
     <div className="support-widget">
@@ -72,76 +60,67 @@ export default function SupportWidget({ lang }: SupportWidgetProps) {
               &times;
             </button>
           </div>
-          <form
-            onSubmit={handleStartChat}
+          <div
             style={{
-              padding: "16px",
+              padding: "20px 16px",
               display: "flex",
               flexDirection: "column",
-              gap: "12px",
+              gap: "14px",
+              alignItems: "center",
+              textAlign: "center",
             }}
           >
             <p
               style={{
-                fontSize: "12.5px",
+                fontSize: "13px",
                 fontFamily: "var(--font-sora)",
-                color: "#777777",
+                color: "#555555",
                 margin: "0",
-                lineHeight: "1.4",
+                lineHeight: "1.5",
               }}
             >
               {t.support.instruction}
             </p>
-            <textarea
-              required
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              placeholder={t.support.placeholder}
+            <a
+              href={`mailto:${t.support.email}`}
               style={{
-                width: "100%",
-                height: "80px",
-                padding: "10px 12px",
-                border: "1px solid #cbd5e1",
-                borderRadius: "6px",
-                fontSize: "13px",
+                fontSize: "14px",
+                fontWeight: "700",
                 fontFamily: "var(--font-primary)",
-                resize: "none",
-                outline: "none",
+                color: "#0c2144",
+                textDecoration: "underline",
+                wordBreak: "break-all",
               }}
-            />
-            <button
-              type="submit"
+            >
+              {t.support.email}
+            </a>
+            <a
+              href={`mailto:${t.support.email}`}
+              onClick={() => setIsOpen(false)}
               style={{
                 background: "var(--primary-blue)",
                 color: "#181c2b",
-                border: "none",
+                textDecoration: "none",
                 borderRadius: "6px",
-                padding: "12px",
+                padding: "10px 16px",
                 fontSize: "14px",
                 fontWeight: "700",
                 fontFamily: "var(--font-sora)",
                 cursor: "pointer",
-                display: "flex",
+                display: "inline-flex",
                 alignItems: "center",
                 justifyContent: "center",
                 gap: "8px",
-                transition: "background 0.2s",
+                width: "100%",
+                transition: "opacity 0.2s",
               }}
             >
-              {t.support.btnChat}
-              <svg
-                viewBox="0 0 24 24"
-                fill="currentColor"
-                width="16"
-                height="16"
-              >
-                <path
-                  d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"
-                  transform="rotate(-45 12 12)"
-                />
+              <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+                <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" />
               </svg>
-            </button>
-          </form>
+              {t.support.btnEmail}
+            </a>
+          </div>
         </div>
       )}
 
@@ -155,9 +134,9 @@ export default function SupportWidget({ lang }: SupportWidgetProps) {
         }}
       >
         <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18">
-          <path d="M12 2C6.477 2 2 6.477 2 12c0 1.821.487 3.53 1.338 5L1.5 22.5l5.8-.8C8.63 22.345 10.27 22 12 22c5.523 0 10-4.477 10-10S17.523 2 12 2zm1 14h-2v-2h2v2zm0-4h-2V7h2v5z" />
+          <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" />
         </svg>
-        {t.support.title}
+        <span className="support-btn-text">{t.support.title}</span>
       </button>
     </div>
   );

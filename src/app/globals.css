@@ -1956,8 +1956,16 @@ tr.row-selected td {
   }
 
   .support-btn {
-    padding: 10px 16px;
-    font-size: 12px;
+    padding: 12px;
+    border-radius: 50%;
+    width: 46px;
+    height: 46px;
+    justify-content: center;
+    gap: 0;
+  }
+
+  .support-btn-text {
+    display: none;
   }
 
   .footer-logos {

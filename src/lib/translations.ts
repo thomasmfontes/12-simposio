@@ -23,10 +23,9 @@ export const translations = {
     },
     support: {
       title: "Suporte",
-      instruction: "Escreva o assunto com detalhes para iniciar uma conversa agora.",
-      placeholder: "Ex: Não consigo finalizar meu cadastro...",
-      btnChat: "Nova conversa",
-      waText: "Olá! Preciso de ajuda com a inscrição no 12º Simpósio.",
+      instruction: "Dúvidas ou problemas com a sua inscrição? Entre em contato conosco pelo e-mail:",
+      email: "cientifico@premierpet.com.br",
+      btnEmail: "Enviar E-mail",
     },
     form: {
       title: "FORMULÁRIO",
@@ -140,10 +139,9 @@ export const translations = {
     },
     support: {
       title: "Soporte",
-      instruction: "Escriba el asunto con detalles para iniciar una conversación ahora.",
-      placeholder: "Ej: No puedo finalizar mi registro...",
-      btnChat: "Nueva conversación",
-      waText: "¡Hola! Necesito ayuda con la inscripción al 12º Simposio.",
+      instruction: "¿Dudas o problemas con su inscripción? Contáctenos por correo electrónico:",
+      email: "cientifico@premierpet.com.br",
+      btnEmail: "Enviar Correo",
     },
     form: {
       title: "FORMULARIO",

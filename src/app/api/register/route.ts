@@ -166,14 +166,14 @@ export async function POST(request: Request) {
       throw insertError;
     }
 
-    // 4. Envio de E-mail via Resend (Processo assíncrono não-bloqueante)
+    // 4. Envio de E-mail via Resend (Processo assíncrono bloqueante para garantir envio na Vercel)
     const apiKey = process.env.RESEND_API_KEY;
     const fromEmail = process.env.RESEND_FROM_EMAIL || "onboarding@resend.dev";
 
     if (apiKey) {
-      const resend = new Resend(apiKey);
-      resend.emails
-        .send({
+      try {
+        const resend = new Resend(apiKey);
+        const res = await resend.emails.send({
           from: `Simpósio Premierpet <${fromEmail}>`,
           to: emailClean,
           subject:
@@ -202,19 +202,17 @@ export async function POST(request: Request) {
             </p>
           </div>
         `,
-        })
-        .then((res) => {
-          if (res.error) {
-            console.error("Erro ao enviar e-mail via Resend:", res.error);
-          } else {
-            console.log(
-              `E-mail enviado via Resend para ${emailClean} (ID: ${res.data?.id})`,
-            );
-          }
-        })
-        .catch((err) => {
-          console.error("Erro ao tentar enviar e-mail com Resend:", err);
         });
+        if (res.error) {
+          console.error("Erro ao enviar e-mail via Resend:", res.error);
+        } else {
+          console.log(
+            `E-mail enviado via Resend para ${emailClean} (ID: ${res.data?.id})`,
+          );
+        }
+      } catch (err) {
+        console.error("Erro ao tentar enviar e-mail com Resend:", err);
+      }
     } else {
       console.log(
         `[SIMULAÇÃO EMAIL] De: Simpósio Premierpet <${fromEmail}> | Para: ${emailClean} | Assunto: Inscrição Confirmada`,

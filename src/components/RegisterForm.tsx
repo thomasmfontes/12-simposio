@@ -254,7 +254,7 @@ export default function RegisterForm({ lang, onSuccess }: RegisterFormProps) {
         onSuccess({
           nm_inscrito: nome,
           ds_email: email,
-          ds_modalidade: modalidade === "Online" ? "On-line" : modalidade,
+          ds_modalidade: modalidade,
         });
       }
     } catch (err) {
@@ -569,7 +569,7 @@ export default function RegisterForm({ lang, onSuccess }: RegisterFormProps) {
           />
           <span>
             {t.form.lgpdText}{" "}
-            <a href="#privacidade" onClick={(e) => e.preventDefault()}>
+            <a href="https://premierpet.com.br/politica-de-privacidade/" target="_blank" rel="noopener noreferrer">
               {t.form.lgpdLink}
             </a>
           </span>

@@ -51,9 +51,6 @@ export default function Home() {
               <li>
                 <a href="#formulario-inscricao">{t.header.inscricao}</a>
               </li>
-              <li>
-                <a href="#formulario-inscricao">{t.header.contato}</a>
-              </li>
             </ul>
           </nav>
 

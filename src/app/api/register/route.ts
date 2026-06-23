@@ -189,8 +189,8 @@ export async function POST(request: Request) {
             <div style="background-color: #f8fafc; border-left: 4px solid #007aff; padding: 16px; border-radius: 0 8px 8px 0; margin: 24px 0;">
               <h3 style="margin-top: 0; color: #0f172a; font-size: 16px;">Detalhes do Evento:</h3>
               <p style="margin: 6px 0; font-size: 15px;"><strong>Modalidade:</strong> ${ds_modalidade}</p>
-              <p style="margin: 6px 0; font-size: 15px;"><strong>Data/Hora:</strong> 02 de setembro de 2026, às 13h</p>
-              <p style="margin: 6px 0; font-size: 15px;"><strong>Local:</strong> CDI / USP (Av. Prof. Lúcio Martins Rodrigues, 310 - Butantã, São Paulo - SP)</p>
+              <p style="margin: 6px 0; font-size: 15px;"><strong>Data/Hora:</strong> 02 de setembro de 2026, às 13:00 horas (horário de Brasília)</p>
+              <p style="margin: 6px 0; font-size: 15px;"><strong>Local:</strong> Centro de Difusão Internacional – CDI/ USP  (Av. Prof. Lúcio Martins Rodrigues, 310 - Butantã, São Paulo - SP, 05508-020)</p>
             </div>
             
             <p style="font-size: 16px; line-height: 1.5;">Caso sua modalidade seja <strong>Online</strong>, em breve enviaremos o link de acesso exclusivo para as transmissões.</p>

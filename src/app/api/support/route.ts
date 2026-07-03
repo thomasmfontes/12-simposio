@@ -29,7 +29,7 @@ export async function POST(request: Request) {
     // 2. Configurações do Resend
     const apiKey = process.env.RESEND_API_KEY;
     const fromEmail = process.env.RESEND_FROM_EMAIL || "onboarding@resend.dev";
-    const supportDestination = "cientifico@premierpet.com.br";
+    const supportDestination = process.env.SUPPORT_DESTINATION_EMAIL || "cientifico@premierpet.com.br";
 
     const userAgent = request.headers.get("user-agent") || "Não identificado";
     const dateFormatted = new Date().toLocaleString("pt-BR", {

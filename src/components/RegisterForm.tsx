@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Language, translations } from "@/lib/translations";
 import Toast from "@/components/Toast";
 
@@ -49,6 +49,27 @@ export default function RegisterForm({ lang, onSuccess }: RegisterFormProps) {
 
   const [modalidade, setModalidade] = useState(""); // Presencial / Online
   const [lgpdAceite, setLgpdAceite] = useState(false);
+  const [presencialFull, setPresencialFull] = useState(false);
+
+  // Efeito para verificar a capacidade de inscrições presenciais
+  useEffect(() => {
+    async function checkCapacity() {
+      try {
+        const res = await fetch("/api/check-capacity");
+        if (res.ok) {
+          const data = await res.json();
+          if (data.presencialFull) {
+            setPresencialFull(true);
+            // Se presencial estiver cheio, seleciona automaticamente Online
+            setModalidade("Online");
+          }
+        }
+      } catch (err) {
+        console.error("Erro ao verificar capacidade presencial:", err);
+      }
+    }
+    checkCapacity();
+  }, []);
 
   // Estados de UI
   const [loading, setLoading] = useState(false);
@@ -246,6 +267,8 @@ export default function RegisterForm({ lang, onSuccess }: RegisterFormProps) {
             msg = t.form.errors.cityRequired;
           } else if (msg.includes("termos de privacidade")) {
             msg = t.form.errors.lgpdRequired;
+          } else if (msg.includes("vagas presenciais estão esgotadas")) {
+            msg = t.form.errors.presencialSoldOut;
           }
         }
         setErrorMsg(msg);
@@ -545,14 +568,15 @@ export default function RegisterForm({ lang, onSuccess }: RegisterFormProps) {
               />
               ONLINE
             </label>
-            <label className="radio-option">
+            <label className={`radio-option ${presencialFull ? "disabled" : ""}`}>
               <input
                 type="radio"
                 name="modalidade"
                 checked={modalidade === "Presencial"}
-                onChange={() => setModalidade("Presencial")}
+                disabled={presencialFull}
+                onChange={() => !presencialFull && setModalidade("Presencial")}
               />
-              PRESENCIAL
+              PRESENCIAL {presencialFull && <span style={{ color: "#ef4444", fontSize: "11px", fontWeight: "700", marginLeft: "4px" }}>({t.form.soldOutLabel})</span>}
             </label>
           </div>
         </div>

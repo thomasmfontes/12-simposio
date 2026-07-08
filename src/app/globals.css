@@ -590,6 +590,12 @@ a:hover {
   user-select: none;
 }
 
+.radio-option.disabled,
+.checkbox-option.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .radio-option input[type="radio"],
 .checkbox-option input[type="checkbox"] {
   width: 16px;
@@ -604,6 +610,11 @@ a:hover {
   margin-right: 2px;
   position: relative;
   top: -1px;
+}
+
+.radio-option input[type="radio"]:disabled,
+.checkbox-option input[type="checkbox"]:disabled {
+  cursor: not-allowed;
 }
 
 /* LGPD checkbox */
@@ -857,6 +868,7 @@ a:hover {
   color: var(--text-white);
   background: linear-gradient(135deg, #ffffff 0%, #a5b4fc 100%);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
@@ -1092,6 +1104,7 @@ a:hover {
   letter-spacing: -0.03em;
   background: linear-gradient(135deg, #ffffff 0%, #cbd5e1 100%);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
@@ -1117,6 +1130,7 @@ a:hover {
 .metric-presencial .metric-value {
   background: linear-gradient(135deg, #34d399 0%, #10b981 100%);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 .metric-presencial:hover {
@@ -1132,6 +1146,7 @@ a:hover {
 .metric-online .metric-value {
   background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 .metric-online:hover {

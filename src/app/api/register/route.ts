@@ -122,6 +122,30 @@ export async function POST(request: Request) {
 
     // 2. Validação contra duplicados
     const emailClean = ds_email.trim().toLowerCase();
+
+    // Verificação de capacidade para inscrições presenciais
+    if (ds_modalidade === "Presencial") {
+      const { count, error: countError } = await db
+        .from("t_inscritos")
+        .select("id_inscrito", { count: "exact", head: true })
+        .eq("ds_modalidade", "Presencial");
+
+      if (countError) {
+        console.error("Erro ao verificar capacidade no Supabase:", countError);
+        throw countError;
+      }
+
+      if (count !== null && count >= 500) {
+        return NextResponse.json(
+          {
+            error:
+              "As vagas presenciais estão esgotadas. Selecione a modalidade Online.",
+          },
+          { status: 400 },
+        );
+      }
+    }
+
     const { data: existing, error: checkError } = await db
       .from("t_inscritos")
       .select("id_inscrito")

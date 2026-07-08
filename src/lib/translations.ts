@@ -77,7 +77,9 @@ export const translations = {
       },
       btnSubmit: "INSCREVA-SE",
       processing: "Processando...",
+      soldOutLabel: "ESGOTADO",
       errors: {
+        presencialSoldOut: "As vagas presenciais estão esgotadas. Selecione a modalidade Online.",
         nameRequired: "Nome completo é obrigatório.",
         dobInvalid: "Data de nascimento inválida. Digite dia (DD), mês (MM) e ano (AAAA) corretamente.",
         emailRequired: "E-mail e confirmação de e-mail são obrigatórios.",
@@ -205,7 +207,9 @@ export const translations = {
       },
       btnSubmit: "INSCRÍBASE",
       processing: "Procesando...",
+      soldOutLabel: "AGOTADO",
       errors: {
+        presencialSoldOut: "Los cupos presenciales se han agotado. Seleccione la modalidad Online.",
         nameRequired: "El nombre completo es obligatorio.",
         dobInvalid: "Fecha de nacimiento inválida. Ingrese el día (DD), mes (MM) y año (AAAA) correctamente.",
         emailRequired: "El correo electrónico y la confirmación son obligatorios.",

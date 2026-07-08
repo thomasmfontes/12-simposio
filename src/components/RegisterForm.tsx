@@ -40,7 +40,7 @@ export default function RegisterForm({ lang, onSuccess }: RegisterFormProps) {
   // Fontes de informação (Como ficou sabendo)
   const [comoSoube, setComoSoube] = useState<{ [key: string]: boolean }>({
     "Promotor Técnico": false,
-    "Alunos Embaixadores Premierpet": false,
+    "Embaixadores Universitários PremieRpet": false,
     "Redes Sociais (Instagram PremierVet, YouTube, TikTok, Linkedin)": false,
     "Professor(a)": false,
     "Outros meios de comunicação": false,
@@ -581,7 +581,11 @@ export default function RegisterForm({ lang, onSuccess }: RegisterFormProps) {
         <h4>{t.form.importantTitle}</h4>
         <p>
           <b>
-            {t.form.importantText}
+            {t.form.importantText.pre}
+            <span style={{ color: "var(--text-white)" }}>
+              {t.form.importantText.highlight}
+            </span>
+            {t.form.importantText.post}
           </b>
         </p>
       </div>

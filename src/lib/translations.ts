@@ -59,7 +59,7 @@ export const translations = {
       howHearLabel: "Como ficou sabendo do 12º Simpósio?",
       howHearOptions: {
         "Promotor Técnico": "Promotor Técnico",
-        "Alunos Embaixadores Premierpet": "Alunos Embaixadores Premierpet",
+        "Embaixadores Universitários PremieRpet": "Embaixadores Universitários PremieRpet",
         "Redes Sociais (Instagram PremierVet, YouTube, TikTok, Linkedin)": "Redes Sociais (Instagram PremierVet, YouTube, TikTok, Linkedin)",
         "Professor(a)": "Professor(a)",
         "Outros meios de comunicação": "Outros meios de comunicação",
@@ -70,7 +70,11 @@ export const translations = {
       lgpdText: "Autorizo o tratamento dos meus dados pessoais para fins de participação na campanha, apuração de resultados, comunicação de informações, entrega de premiações e divulgação de meu nome, imagem e voz, sem ônus, exclusivamente para ações relacionadas ao programa.",
       lgpdLink: "Confira nossa política de privacidade.",
       importantTitle: "⚠️ IMPORTANTE ⚠️",
-      importantText: "AO SE INSCREVER VOCÊ RECEBERÁ UM E-MAIL DE CONFIRMAÇÃO E LINK PARA O DIA.",
+      importantText: {
+        pre: "AO SE INSCREVER VOCÊ RECEBERÁ UM E-MAIL DE CONFIRMAÇÃO E ",
+        highlight: "LINK PARA O DIA",
+        post: ".",
+      },
       btnSubmit: "INSCREVA-SE",
       processing: "Processando...",
       errors: {
@@ -183,7 +187,7 @@ export const translations = {
       howHearLabel: "¿Cómo se enteró del 12º Simposio?",
       howHearOptions: {
         "Promotor Técnico": "Promotor Técnico",
-        "Alunos Embaixadores Premierpet": "Alumnos Embajadores Premierpet",
+        "Embaixadores Universitários PremieRpet": "Embajadores Universitarios PremieRpet",
         "Redes Sociais (Instagram PremierVet, YouTube, TikTok, Linkedin)": "Redes Sociales (Instagram PremierVet, YouTube, TikTok, Linkedin)",
         "Professor(a)": "Profesor(a)",
         "Outros meios de comunicação": "Otros medios de comunicação",
@@ -194,7 +198,11 @@ export const translations = {
       lgpdText: "Autorizo el tratamiento de mis datos personales con fines de participación en la campaña, cómputo de resultados, comunicación de información, entrega de premios y difusión de mi nombre, imagen y voz, sin costo alguno, exclusivamente para acciones relacionadas con el programa.",
       lgpdLink: "Consulte nuestra política de privacidad.",
       importantTitle: "⚠️ IMPORTANTE ⚠️",
-      importantText: "AL INSCRIBIRSE RECIBIRÁ UN CORREO ELECTRÓNICO DE CONFIRMACIÓN Y EL ENLACE PARA EL DÍA.",
+      importantText: {
+        pre: "AL INSCRIBIRSE RECIBIRÁ UN CORREO ELECTRÓNICO DE CONFIRMACIÓN Y ",
+        highlight: "EL ENLACE PARA EL DÍA",
+        post: ".",
+      },
       btnSubmit: "INSCRÍBASE",
       processing: "Procesando...",
       errors: {

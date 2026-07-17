@@ -289,6 +289,36 @@ export default function Home() {
         </div>
       </section>
 
+      {/* 4.5. Seção de Palestrantes (Participações Confirmadas) */}
+      <section className="speakers-section">
+        <div className="container">
+          <div className="section-header">
+            <h2 className="speakers-section-title">{t.speakers.title}</h2>
+          </div>
+          <div className="speakers-list">
+            {t.speakers.list.map((speaker, index) => (
+              <div key={index} className="speaker-item">
+                <div className="speaker-image-container">
+                  <img
+                    src={speaker.image}
+                    alt={speaker.name}
+                    className="speaker-photo"
+                  />
+                </div>
+                <div className="speaker-info">
+                  <h3 className="speaker-name-row">
+                    <span className="speaker-name">{speaker.name}</span>
+                    <span className="speaker-time-divider">|</span>
+                    <span className="speaker-time">{speaker.time}</span>
+                  </h3>
+                  <p className="speaker-talk-title">{speaker.title}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* 5. Rodapé Institucional */}
       <footer className="footer">
         <div className="container">

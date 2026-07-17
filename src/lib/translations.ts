@@ -127,6 +127,53 @@ export const translations = {
       idealizacao: "Idealização:",
       realizacao: "Realização:",
       restrictedArea: "Área Restrita"
+    },
+    speakers: {
+      title: "PARTICIPAÇÕES CONFIRMADAS:",
+      list: [
+        {
+          name: "Dr. Archivaldo Reche",
+          time: "14h20",
+          title: "Diarreia em Gatos: Quando a dieta gastrointestinal faz a diferença",
+          image: "/design/Archivaldo%20Reche.png"
+        },
+        {
+          name: "Dr. Fabio Teixeira",
+          time: "15h10",
+          title: "Nutrição em Pacientes Hepatopatas: O que mudou?",
+          image: "/design/Fabio%20Teixeira.png"
+        },
+        {
+          name: "Dr. Thiago Vendramini",
+          time: "16h00",
+          title: "Carne Fresca e Farinha de Vísceras: Entendendo o papel de cada ingrediente",
+          image: "/design/Thiago%20Vendramini.png"
+        },
+        {
+          name: "Dra. Alessandra Vargas",
+          time: "17h30",
+          title: "Gato Diabético: Diagnóstico, Monitoramento e Tomada de Decisão",
+          image: "/design/Alessandra%20Vargas.png"
+        },
+        {
+          name: "Dra. Andressa Amaral",
+          time: "18h25",
+          title: "Momento PremieRvet",
+          image: "/design/Andressa%20Amaral.png"
+        },
+        {
+          name: "Dr. Ronaldo Lucas",
+          time: "18h55",
+          title: "Otites externas e abordagem clínica",
+          image: "/design/Ronaldo%20Lucas.png"
+        },
+        {
+          name: "Dr. Marty Becker",
+          time: "19h35",
+          title: "O paciente conta a história. Você faz o diagnóstico.",
+          image: "/design/Marty%20Becker.png"
+        }
+      ]
     }
   },
   es: {
@@ -257,6 +304,53 @@ export const translations = {
       idealizacao: "Idealización:",
       realizacao: "Realización:",
       restrictedArea: "Área Restringida"
+    },
+    speakers: {
+      title: "PARTICIPACIONES CONFIRMADAS:",
+      list: [
+        {
+          name: "Dr. Archivaldo Reche",
+          time: "14h20",
+          title: "Diarrea en Gatos: Cuándo la dieta gastrointestinal marca la diferencia",
+          image: "/design/Archivaldo%20Reche.png"
+        },
+        {
+          name: "Dr. Fabio Teixeira",
+          time: "15h10",
+          title: "Nutrición en Pacientes Hepatópatas: ¿Qué ha cambiado?",
+          image: "/design/Fabio%20Teixeira.png"
+        },
+        {
+          name: "Dr. Thiago Vendramini",
+          time: "16h00",
+          title: "Carne Fresca y Harina de Vísceras: Entendiendo el papel de cada ingrediente",
+          image: "/design/Thiago%20Vendramini.png"
+        },
+        {
+          name: "Dra. Alessandra Vargas",
+          time: "17h30",
+          title: "Gato Diabético: Diagnóstico, Monitoreo y Toma de Decisiones",
+          image: "/design/Alessandra%20Vargas.png"
+        },
+        {
+          name: "Dra. Andressa Amaral",
+          time: "18h25",
+          title: "Momento PremieRvet",
+          image: "/design/Andressa%20Amaral.png"
+        },
+        {
+          name: "Dr. Ronaldo Lucas",
+          time: "18h55",
+          title: "Otitis externas y abordaje clínico",
+          image: "/design/Ronaldo%20Lucas.png"
+        },
+        {
+          name: "Dr. Marty Becker",
+          time: "19h35",
+          title: "El paciente cuenta la historia. Usted hace el diagnóstico.",
+          image: "/design/Marty%20Becker.png"
+        }
+      ]
     }
   }
 };

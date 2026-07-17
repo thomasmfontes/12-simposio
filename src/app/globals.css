@@ -1988,6 +1988,150 @@ tr.row-selected td {
   }
 }
 
+/* --- SEÇÃO DE PALESTRANTES --- */
+.speakers-section {
+  position: relative;
+  padding: 40px 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  overflow: hidden;
+}
+
+.speakers-section::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url("/design/bg_hero_texture.png");
+  background-size: cover;
+  background-position: top center;
+  /* Sentido oposto ao hero/formulario (sem scaleX) */
+  z-index: 0;
+}
+
+.speakers-section .container {
+  position: relative;
+  z-index: 1;
+}
+
+.section-header .speakers-section-title {
+  color: var(--primary-blue);
+  text-shadow: 0 0 30px rgba(86, 153, 219, 0.15);
+}
+
+.speakers-list {
+  max-width: 800px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.speaker-item {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  transition: border-color 0.3s ease;
+}
+
+.speaker-item:last-child {
+  border-bottom: none;
+}
+
+.speaker-image-container {
+  position: relative;
+  width: 96px;
+  flex-shrink: 0;
+}
+
+.speaker-photo {
+  width: 100%;
+  height: auto;
+  display: block;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.speaker-item:hover .speaker-photo {
+  transform: scale(1.06);
+}
+
+
+.speaker-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.speaker-name-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-family: var(--font-display), sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--primary-blue);
+  line-height: 1.2;
+}
+
+.speaker-time-divider {
+  color: rgba(255, 255, 255, 0.2);
+  margin: 0 4px;
+}
+
+.speaker-time {
+  color: var(--primary-blue);
+}
+
+.speaker-talk-title {
+  font-family: var(--font-primary), sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  color: var(--text-white);
+  line-height: 1.5;
+}
+
+@media (max-width: 768px) {
+  .section-header .speakers-section-title {
+    font-size: 26px;
+  }
+  
+  .speaker-item {
+    gap: 20px;
+    padding-bottom: 20px;
+  }
+  
+  .speaker-image-container {
+    width: 84px;
+  }
+  
+  .speaker-name-row {
+    font-size: 18px;
+  }
+  
+  .speaker-talk-title {
+    font-size: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .section-header .speakers-section-title {
+    font-size: 22px;
+  }
+
+  .speaker-item {
+    flex-direction: column;
+    text-align: center;
+    align-items: center;
+    gap: 16px;
+  }
+  
+  .speaker-name-row {
+    justify-content: center;
+  }
+}
+
 /* --- RODAPÉ --- */
 .footer {
   width: 100%;

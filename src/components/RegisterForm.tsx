@@ -13,6 +13,53 @@ interface RegisterFormProps {
   }) => void;
 }
 
+export interface CountryPhoneConfig {
+  name: string;
+  nameEs: string;
+  iso: string;
+  ddi: string;
+  placeholder: string;
+}
+
+export const COUNTRY_PHONE_CONFIGS: CountryPhoneConfig[] = [
+  { name: "Brasil", nameEs: "Brasil", iso: "br", ddi: "+55", placeholder: "(11) 99999-9999" },
+  { name: "Bolívia", nameEs: "Bolivia", iso: "bo", ddi: "+591", placeholder: "7000-0000" },
+  { name: "Chile", nameEs: "Chile", iso: "cl", ddi: "+56", placeholder: "9 1234 5678" },
+  { name: "Colômbia", nameEs: "Colombia", iso: "co", ddi: "+57", placeholder: "300 123 4567" },
+  { name: "Equador", nameEs: "Ecuador", iso: "ec", ddi: "+593", placeholder: "099 123 4567" },
+  { name: "Paraguai", nameEs: "Paraguay", iso: "py", ddi: "+595", placeholder: "981 123 456" },
+  { name: "Uruguai", nameEs: "Uruguay", iso: "uy", ddi: "+598", placeholder: "99 123 456" },
+  { name: "Argentina", nameEs: "Argentina", iso: "ar", ddi: "+54", placeholder: "11 1234-5678" },
+  { name: "Peru", nameEs: "Perú", iso: "pe", ddi: "+51", placeholder: "912 345 678" },
+  { name: "Espanha", nameEs: "España", iso: "es", ddi: "+34", placeholder: "612 345 678" },
+  { name: "Portugal", nameEs: "Portugal", iso: "pt", ddi: "+351", placeholder: "912 345 678" },
+  { name: "Angola", nameEs: "Angola", iso: "ao", ddi: "+244", placeholder: "912 345 678" },
+  { name: "Cabo Verde", nameEs: "Cabo Verde", iso: "cv", ddi: "+238", placeholder: "912 3456" },
+  { name: "Moçambique", nameEs: "Mozambique", iso: "mz", ddi: "+258", placeholder: "82 123 4567" },
+  { name: "Outro", nameEs: "Otro", iso: "un", ddi: "+", placeholder: "123456789" },
+];
+
+const renderFlagIcon = (iso: string, name: string) => {
+  if (iso === "un") {
+    return (
+      <svg className="flag-img globe-icon" width="22" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <circle cx="12" cy="12" r="10"/>
+        <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/>
+        <path d="M2 12h20"/>
+      </svg>
+    );
+  }
+  return (
+    <img
+      src={`https://flagcdn.com/w40/${iso}.png`}
+      alt={name}
+      width="22"
+      height="15"
+      className="flag-img"
+    />
+  );
+};
+
 export default function RegisterForm({ lang, onSuccess }: RegisterFormProps) {
   const t = translations[lang];
 
@@ -51,6 +98,56 @@ export default function RegisterForm({ lang, onSuccess }: RegisterFormProps) {
   const [lgpdAceite, setLgpdAceite] = useState(false);
   const [presencialFull, setPresencialFull] = useState(false);
 
+  // Seletor de país/bandeira para o campo de telefone e país
+  const [openPhoneDropdown, setOpenPhoneDropdown] = useState(false);
+  const [openPhoneConfirmDropdown, setOpenPhoneConfirmDropdown] = useState(false);
+  const [openPaisDropdown, setOpenPaisDropdown] = useState(false);
+  const [searchPhone, setSearchPhone] = useState("");
+
+  const phoneContainerRef = React.useRef<HTMLDivElement>(null);
+  const phoneConfirmContainerRef = React.useRef<HTMLDivElement>(null);
+  const paisContainerRef = React.useRef<HTMLDivElement>(null);
+
+  const currentCountryConfig =
+    COUNTRY_PHONE_CONFIGS.find(
+      (c) => c.name === pais || c.nameEs === pais
+    ) || COUNTRY_PHONE_CONFIGS[0];
+
+  const filteredPhoneConfigs = COUNTRY_PHONE_CONFIGS.filter((c) => {
+    const term = searchPhone.toLowerCase().trim();
+    if (!term) return true;
+    return (
+      c.name.toLowerCase().includes(term) ||
+      c.nameEs.toLowerCase().includes(term) ||
+      c.ddi.includes(term)
+    );
+  });
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        phoneContainerRef.current &&
+        !phoneContainerRef.current.contains(event.target as Node)
+      ) {
+        setOpenPhoneDropdown(false);
+      }
+      if (
+        phoneConfirmContainerRef.current &&
+        !phoneConfirmContainerRef.current.contains(event.target as Node)
+      ) {
+        setOpenPhoneConfirmDropdown(false);
+      }
+      if (
+        paisContainerRef.current &&
+        !paisContainerRef.current.contains(event.target as Node)
+      ) {
+        setOpenPaisDropdown(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   // Efeito para verificar a capacidade de inscrições presenciais
   useEffect(() => {
     async function checkCapacity() {
@@ -76,17 +173,24 @@ export default function RegisterForm({ lang, onSuccess }: RegisterFormProps) {
   const [errorMsg, setErrorMsg] = useState("");
 
   // Máscaras automáticas para telefone
-  const formatPhone = (value: string) => {
-    // Remove tudo que não for dígito
-    const clean = value.replace(/\D/g, "");
-    if (clean.length <= 2) {
-      return clean;
-    } else if (clean.length <= 6) {
-      return `(${clean.slice(0, 2)}) ${clean.slice(2)}`;
-    } else if (clean.length <= 10) {
-      return `(${clean.slice(0, 2)}) ${clean.slice(2, 6)}-${clean.slice(6)}`;
+  const formatPhone = (value: string, selectedPais: string = pais) => {
+    if (selectedPais === "Brasil") {
+      // Remove tudo que não for dígito
+      const clean = value.replace(/\D/g, "");
+      if (clean.length === 0) return "";
+      if (clean.length <= 2) {
+        return clean;
+      } else if (clean.length <= 6) {
+        return `(${clean.slice(0, 2)}) ${clean.slice(2)}`;
+      } else if (clean.length <= 10) {
+        return `(${clean.slice(0, 2)}) ${clean.slice(2, 6)}-${clean.slice(6)}`;
+      } else {
+        return `(${clean.slice(0, 2)}) ${clean.slice(2, 7)}-${clean.slice(7, 11)}`;
+      }
     } else {
-      return `(${clean.slice(0, 2)}) ${clean.slice(2, 7)}-${clean.slice(7, 11)}`;
+      // Para telefones internacionais (Colômbia, Bolívia, Equador, etc.)
+      // Permite código internacional (+), DDD de 3+ dígitos, números, espaços, hífens e parênteses sem truncar
+      return value.replace(/[^\d\s+\-()]/g, "").slice(0, 25);
     }
   };
 
@@ -94,11 +198,21 @@ export default function RegisterForm({ lang, onSuccess }: RegisterFormProps) {
     e: React.ChangeEvent<HTMLInputElement>,
     type: "main" | "confirm",
   ) => {
-    const formatted = formatPhone(e.target.value);
+    const formatted = formatPhone(e.target.value, pais);
     if (type === "main") {
       setTelefone(formatted);
     } else {
       setTelefoneConfirm(formatted);
+    }
+  };
+
+  const handlePaisChange = (newPais: string) => {
+    setPais(newPais);
+    if (telefone) {
+      setTelefone(formatPhone(telefone, newPais));
+    }
+    if (telefoneConfirm) {
+      setTelefoneConfirm(formatPhone(telefoneConfirm, newPais));
     }
   };
 
@@ -215,13 +329,23 @@ export default function RegisterForm({ lang, onSuccess }: RegisterFormProps) {
     }
 
     // 2. Monta payload
+    const getFullPhone = (phoneVal: string) => {
+      const cleanVal = phoneVal.trim();
+      if (!cleanVal) return "";
+      if (pais === "Brasil" || cleanVal.startsWith("+")) return cleanVal;
+      return `${currentCountryConfig.ddi} ${cleanVal}`;
+    };
+
+    const finalPhone = getFullPhone(telefone);
+    const finalPhoneConfirm = getFullPhone(telefoneConfirm);
+
     const payload = {
       nm_inscrito: nome,
       dt_nascimento: dataNascimento,
       ds_email: email,
       ds_email_confirmacao: emailConfirm,
-      nu_telefone: telefone,
-      nu_telefone_confirmacao: telefoneConfirm,
+      nu_telefone: finalPhone,
+      nu_telefone_confirmacao: finalPhoneConfirm,
       nm_pais: pais,
       nm_cidade: cidade,
       fl_graduado: graduado,
@@ -343,35 +467,167 @@ export default function RegisterForm({ lang, onSuccess }: RegisterFormProps) {
           />
         </div>
 
-        {/* Telefone e Confirmação */}
+        {/* Telefone e Confirmação com Seletor de Bandeira */}
         <div className="input-field-wrapper">
           <label htmlFor="telefone">
             {t.form.phoneLabel} <span>*</span>
           </label>
-          <input
-            id="telefone"
-            type="tel"
-            required
-            className="input-field"
-            value={telefone}
-            onChange={(e) => handlePhoneChange(e, "main")}
-            placeholder="(11) 99999-9999"
-          />
+          <div className="phone-input-container" ref={phoneContainerRef}>
+            <button
+              type="button"
+              className="phone-flag-trigger"
+              onClick={() => {
+                setOpenPhoneDropdown(!openPhoneDropdown);
+                setSearchPhone("");
+              }}
+              title="Selecionar país / DDI"
+            >
+              {renderFlagIcon(currentCountryConfig.iso, currentCountryConfig.name)}
+              <span className="ddi-code">{currentCountryConfig.ddi}</span>
+              <span className={`arrow-icon ${openPhoneDropdown ? "open" : ""}`}>
+                ▼
+              </span>
+            </button>
+            <input
+              id="telefone"
+              type="tel"
+              required
+              className="input-field input-field-with-flag"
+              value={telefone}
+              onChange={(e) => handlePhoneChange(e, "main")}
+              placeholder={currentCountryConfig.placeholder}
+            />
+            {openPhoneDropdown && (
+              <div className="phone-flag-dropdown">
+                <div className="flag-search-box">
+                  <svg className="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                    <circle cx="11" cy="11" r="8"/>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                  </svg>
+                  <input
+                    type="text"
+                    className="flag-search-input"
+                    placeholder={lang === "es" ? "Buscar país o código..." : "Buscar país ou código..."}
+                    value={searchPhone}
+                    onChange={(e) => setSearchPhone(e.target.value)}
+                    onClick={(e) => e.stopPropagation()}
+                    autoFocus
+                  />
+                </div>
+                <div className="phone-flag-options-list">
+                  {filteredPhoneConfigs.length === 0 ? (
+                    <div style={{ padding: "12px", textAlign: "center", color: "#94a3b8", fontSize: "13px" }}>
+                      {lang === "es" ? "No se encontraron países" : "Nenhum país encontrado"}
+                    </div>
+                  ) : (
+                    filteredPhoneConfigs.map((item) => (
+                      <div
+                        key={item.name}
+                        className={`phone-flag-option ${
+                          item.name === pais ? "selected" : ""
+                        }`}
+                        onClick={() => {
+                          handlePaisChange(item.name);
+                          setOpenPhoneDropdown(false);
+                        }}
+                      >
+                        <div className="phone-flag-option-left">
+                          {renderFlagIcon(item.iso, item.name)}
+                          <span className="phone-flag-option-name">
+                            {lang === "es" ? item.nameEs : item.name}
+                          </span>
+                        </div>
+                        <span className="phone-flag-option-ddi">{item.ddi}</span>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
         </div>
 
         <div className="input-field-wrapper">
           <label htmlFor="telefoneConfirm">
             {t.form.phoneConfirmLabel} <span>*</span>
           </label>
-          <input
-            id="telefoneConfirm"
-            type="tel"
-            required
-            className="input-field"
-            value={telefoneConfirm}
-            onChange={(e) => handlePhoneChange(e, "confirm")}
-            placeholder={t.form.phoneConfirmPlaceholder}
-          />
+          <div className="phone-input-container" ref={phoneConfirmContainerRef}>
+            <button
+              type="button"
+              className="phone-flag-trigger"
+              onClick={() => {
+                setOpenPhoneConfirmDropdown(!openPhoneConfirmDropdown);
+                setSearchPhone("");
+              }}
+              title="Selecionar país / DDI"
+            >
+              {renderFlagIcon(currentCountryConfig.iso, currentCountryConfig.name)}
+              <span className="ddi-code">{currentCountryConfig.ddi}</span>
+              <span
+                className={`arrow-icon ${
+                  openPhoneConfirmDropdown ? "open" : ""
+                }`}
+              >
+                ▼
+              </span>
+            </button>
+            <input
+              id="telefoneConfirm"
+              type="tel"
+              required
+              className="input-field input-field-with-flag"
+              value={telefoneConfirm}
+              onChange={(e) => handlePhoneChange(e, "confirm")}
+              placeholder={currentCountryConfig.placeholder}
+            />
+            {openPhoneConfirmDropdown && (
+              <div className="phone-flag-dropdown">
+                <div className="flag-search-box">
+                  <svg className="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                    <circle cx="11" cy="11" r="8"/>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                  </svg>
+                  <input
+                    type="text"
+                    className="flag-search-input"
+                    placeholder={lang === "es" ? "Buscar país o código..." : "Buscar país ou código..."}
+                    value={searchPhone}
+                    onChange={(e) => setSearchPhone(e.target.value)}
+                    onClick={(e) => e.stopPropagation()}
+                    autoFocus
+                  />
+                </div>
+                <div className="phone-flag-options-list">
+                  {filteredPhoneConfigs.length === 0 ? (
+                    <div style={{ padding: "12px", textAlign: "center", color: "#94a3b8", fontSize: "13px" }}>
+                      {lang === "es" ? "No se encontraron países" : "Nenhum país encontrado"}
+                    </div>
+                  ) : (
+                    filteredPhoneConfigs.map((item) => (
+                      <div
+                        key={item.name}
+                        className={`phone-flag-option ${
+                          item.name === pais ? "selected" : ""
+                        }`}
+                        onClick={() => {
+                          handlePaisChange(item.name);
+                          setOpenPhoneConfirmDropdown(false);
+                        }}
+                      >
+                        <div className="phone-flag-option-left">
+                          {renderFlagIcon(item.iso, item.name)}
+                          <span className="phone-flag-option-name">
+                            {lang === "es" ? item.nameEs : item.name}
+                          </span>
+                        </div>
+                        <span className="phone-flag-option-ddi">{item.ddi}</span>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* País e Cidade */}
@@ -379,19 +635,61 @@ export default function RegisterForm({ lang, onSuccess }: RegisterFormProps) {
           <label htmlFor="pais">
             {t.form.countryLabel} <span>*</span>
           </label>
-          <select
-            id="pais"
-            className="input-field"
-            value={pais}
-            onChange={(e) => setPais(e.target.value)}
-            style={{ appearance: "auto" }}
-          >
-            {t.form.countries.map((c) => (
-              <option key={c.value} value={c.value}>
-                {c.label}
-              </option>
-            ))}
-          </select>
+          <div className="custom-country-select-container" ref={paisContainerRef}>
+            <div
+              className="custom-country-select-trigger"
+              onClick={() => setOpenPaisDropdown(!openPaisDropdown)}
+            >
+              <div className="custom-country-selected-info">
+                {renderFlagIcon(currentCountryConfig.iso, currentCountryConfig.name)}
+                <span>
+                  {lang === "es"
+                    ? currentCountryConfig.nameEs
+                    : currentCountryConfig.name}
+                </span>
+              </div>
+              <span className={`arrow-icon ${openPaisDropdown ? "open" : ""}`}>
+                ▼
+              </span>
+            </div>
+
+            {openPaisDropdown && (
+              <div className="custom-country-dropdown">
+                {COUNTRY_PHONE_CONFIGS.map((item) => (
+                  <div
+                    key={item.name}
+                    className={`custom-country-option ${
+                      item.name === pais ? "selected" : ""
+                    }`}
+                    onClick={() => {
+                      handlePaisChange(item.name);
+                      setOpenPaisDropdown(false);
+                    }}
+                  >
+                    <div className="custom-country-option-left">
+                      {renderFlagIcon(item.iso, item.name)}
+                      <span>
+                        {lang === "es" ? item.nameEs : item.name}
+                      </span>
+                    </div>
+                    {item.name === pais && (
+                      <svg
+                        className="check-icon"
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="#0056b3"
+                        strokeWidth="3"
+                      >
+                        <polyline points="20 6 9 17 4 12" />
+                      </svg>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
 
         <div className="input-field-wrapper">

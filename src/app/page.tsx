@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Countdown from "@/components/Countdown";
 import SupportWidget from "@/components/SupportWidget";
 import RegisterForm from "@/components/RegisterForm";
@@ -17,6 +17,36 @@ export default function Home() {
   const t = translations[lang];
   const [successData, setSuccessData] = useState<SuccessData | null>(null);
   const [quickEmail, setQuickEmail] = useState("");
+
+  // Detecta o idioma da URL (/es, ?lang=es) ou do navegador ao carregar a página
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const urlLang = params.get("lang") || params.get("idioma");
+      const pathname = window.location.pathname;
+
+      if (pathname === "/es" || pathname.startsWith("/es/") || urlLang === "es") {
+        setLang("es");
+      } else if (pathname === "/pt" || pathname.startsWith("/pt/") || urlLang === "pt") {
+        setLang("pt");
+      } else {
+        // Detecção automática baseada no idioma do navegador
+        const userLang = navigator.language || (navigator.languages && navigator.languages[0]) || "";
+        if (userLang.toLowerCase().startsWith("es")) {
+          setLang("es");
+        }
+      }
+    }
+  }, []);
+
+  // Altera o idioma e sincroniza com a URL limpa (/es) para compartilhamento direto
+  const handleLanguageChange = (newLang: Language) => {
+    setLang(newLang);
+    if (typeof window !== "undefined") {
+      const targetPath = newLang === "es" ? "/es" : "/";
+      window.history.replaceState({}, "", targetPath);
+    }
+  };
 
   const handleQuickSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -77,7 +107,7 @@ export default function Home() {
               <button
                 className="flag-btn"
                 title="Português"
-                onClick={() => setLang("pt")}
+                onClick={() => handleLanguageChange("pt")}
                 style={{ opacity: lang === "pt" ? 1 : 0.6, display: "flex", padding: 0 }}
               >
                 <img
@@ -89,7 +119,7 @@ export default function Home() {
               <button
                 className="flag-btn"
                 title="Español"
-                onClick={() => setLang("es")}
+                onClick={() => handleLanguageChange("es")}
                 style={{ opacity: lang === "es" ? 1 : 0.6, display: "flex", padding: 0 }}
               >
                 <img

@@ -24,6 +24,7 @@ export interface Inscrito {
   ds_como_soube_outro?: string | null;
   ds_modalidade: string;
   fl_lgpd_aceite: number;
+  fl_comunicacoes_aceite?: number;
   dt_cadastro: string;
 }
 

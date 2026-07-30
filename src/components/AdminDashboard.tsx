@@ -19,6 +19,7 @@ export interface InscritoData {
   ds_como_soube_outro?: string | null;
   ds_modalidade: string;
   fl_lgpd_aceite: number;
+  fl_comunicacoes_aceite?: number;
   dt_cadastro: string;
 }
 
@@ -344,6 +345,7 @@ export default function AdminDashboard({
       "Outros detalhes",
       "Modalidade",
       "Aceite LGPD",
+      "Receber Comunicações",
       "Data Cadastro",
     ];
 
@@ -362,6 +364,7 @@ export default function AdminDashboard({
       p.ds_como_soube_outro || "",
       p.ds_modalidade,
       p.fl_lgpd_aceite === 1 ? "Sim" : "Não",
+      p.fl_comunicacoes_aceite === 1 ? "Sim" : "Não",
       p.dt_cadastro,
     ]);
 

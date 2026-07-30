@@ -96,6 +96,7 @@ export default function RegisterForm({ lang, onSuccess }: RegisterFormProps) {
 
   const [modalidade, setModalidade] = useState(""); // Presencial / Online
   const [lgpdAceite, setLgpdAceite] = useState(false);
+  const [comunicacoesAceite, setComunicacoesAceite] = useState(false);
   const [presencialFull, setPresencialFull] = useState(false);
 
   // Seletor de país/bandeira para o campo de telefone e país
@@ -357,6 +358,7 @@ export default function RegisterForm({ lang, onSuccess }: RegisterFormProps) {
         : null,
       ds_modalidade: modalidade,
       fl_lgpd_aceite: lgpdAceite ? 1 : 0,
+      fl_comunicacoes_aceite: comunicacoesAceite ? 1 : 0,
     };
 
     // 3. Envia para a API
@@ -895,6 +897,18 @@ export default function RegisterForm({ lang, onSuccess }: RegisterFormProps) {
               {t.form.lgpdLink}
             </a>
           </span>
+        </label>
+      </div>
+
+      {/* Aceite de Comunicações */}
+      <div className="lgpd-wrapper" style={{ marginTop: "12px" }}>
+        <label className="lgpd-option">
+          <input
+            type="checkbox"
+            checked={comunicacoesAceite}
+            onChange={(e) => setComunicacoesAceite(e.target.checked)}
+          />
+          <span>{t.form.comunicacoesText}</span>
         </label>
       </div>
 

@@ -22,6 +22,7 @@ export async function POST(request: Request) {
       ds_como_soube_outro,
       ds_modalidade,
       fl_lgpd_aceite,
+      fl_comunicacoes_aceite,
     } = body;
 
     // 1. Validações básicas de campos obrigatórios
@@ -182,6 +183,7 @@ export async function POST(request: Request) {
         ds_como_soube_outro: ds_como_soube_outro ? ds_como_soube_outro.trim() : null,
         ds_modalidade,
         fl_lgpd_aceite: fl_lgpd_aceite ? 1 : 0,
+        fl_comunicacoes_aceite: fl_comunicacoes_aceite ? 1 : 0,
         dt_cadastro,
       });
 

@@ -69,6 +69,7 @@ export const translations = {
       modalityLabel: "Modalidade de Participação",
       lgpdText: "Autorizo o tratamento dos meus dados pessoais para fins de participação na campanha, apuração de resultados, comunicação de informações, entrega de premiações e divulgação de meu nome, imagem e voz, sem ônus, exclusivamente para ações relacionadas ao programa.",
       lgpdLink: "Confira nossa política de privacidade.",
+      comunicacoesText: "Aceito receber comunicações, conteúdos, novidades, pesquisas e ofertas da PremieRpet por e-mail, WhatsApp, SMS e outros canais.",
       importantTitle: "⚠️ IMPORTANTE ⚠️",
       importantText: {
         pre: "AO SE INSCREVER VOCÊ RECEBERÁ UM E-MAIL DE CONFIRMAÇÃO E ",
@@ -254,6 +255,7 @@ export const translations = {
       modalityLabel: "Modalidad de Participación",
       lgpdText: "Autorizo el tratamiento de mis datos personales con fines de participación en la campaña, cómputo de resultados, comunicación de información, entrega de premios y difusión de mi nombre, imagen y voz, sin costo alguno, exclusivamente para acciones relacionadas con el programa.",
       lgpdLink: "Consulte nuestra política de privacidad.",
+      comunicacoesText: "Acepto recibir comunicaciones, contenidos, novedades, encuestas y ofertas de PremieRpet por correo electrónico, WhatsApp, SMS y otros canales.",
       importantTitle: "⚠️ IMPORTANTE ⚠️",
       importantText: {
         pre: "AL INSCRIBIRSE RECIBIRÁ UN CORREO ELECTRÓNICO DE CONFIRMACIÓN Y ",

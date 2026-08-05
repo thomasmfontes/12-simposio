@@ -143,3 +143,53 @@ export async function DELETE(request: Request) {
     );
   }
 }
+
+// Endpoint para atualizar a modalidade de um participante (Presencial <-> Online)
+export async function PATCH(request: Request) {
+  if (!(await isAuthenticated())) {
+    return NextResponse.json({ error: "Não autorizado." }, { status: 401 });
+  }
+
+  try {
+    const body = await request.json();
+    const { id_inscrito, ds_modalidade } = body;
+
+    if (!id_inscrito || !ds_modalidade) {
+      return NextResponse.json(
+        { error: "ID do inscrito e nova modalidade são obrigatórios." },
+        { status: 400 },
+      );
+    }
+
+    if (ds_modalidade !== "Presencial" && ds_modalidade !== "Online") {
+      return NextResponse.json(
+        { error: "Modalidade inválida. Escolha 'Presencial' ou 'Online'." },
+        { status: 400 },
+      );
+    }
+
+    const { error: updateError, data } = await db
+      .from("t_inscritos")
+      .update({ ds_modalidade })
+      .eq("id_inscrito", id_inscrito)
+      .select();
+
+    if (updateError) {
+      console.error("Erro ao atualizar modalidade no Supabase:", updateError);
+      throw updateError;
+    }
+
+    return NextResponse.json({
+      success: true,
+      message: "Modalidade atualizada com sucesso.",
+      data,
+    });
+  } catch (error) {
+    console.error("Erro ao atualizar modalidade:", error);
+    return NextResponse.json(
+      { error: "Erro interno ao atualizar modalidade." },
+      { status: 500 },
+    );
+  }
+}
+

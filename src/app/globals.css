@@ -1417,16 +1417,15 @@ a:hover {
   color: #ffffff;
 }
 
-/* Tabela de Dados Premium */
+/* Tabela de Dados - Alta Performance */
 .table-card {
-  background: rgba(18, 26, 48, 0.35);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: #0d1527;
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 20px;
   overflow: hidden;
-  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.4);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
 }
+
 
 .table-header-bar {
   padding: 24px;
@@ -1628,10 +1627,15 @@ tr.row-selected td {
 }
 
 /* Badges da Tabela */
+.badge-modalidade-container {
+  position: relative;
+  display: inline-block;
+}
+
 .badge-modalidade {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   padding: 5px 12px;
   border-radius: 20px;
   font-size: 10px;
@@ -1639,13 +1643,109 @@ tr.row-selected td {
   text-transform: uppercase;
   letter-spacing: 0.05em;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+  border: none;
+  font-family: inherit;
+  user-select: none;
 }
+
+.badge-modalidade:hover {
+  filter: brightness(1.2);
+  transform: translateY(-1px);
+}
+
+.badge-modalidade:active {
+  transform: translateY(0);
+}
+
+.badge-modalidade.open {
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.35);
+}
+
+.badge-modalidade.loading {
+  background: rgba(255, 255, 255, 0.08);
+  color: #94a3b8;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  padding: 5px 12px;
+  cursor: wait;
+}
+
+.badge-chevron {
+  width: 10px;
+  height: 10px;
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
+}
+
+.badge-chevron.open {
+  transform: rotate(180deg);
+}
+
+/* Floating custom dropdown menu - Minimalista e Funcional */
+.badge-modalidade-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  z-index: 1000;
+  min-width: 125px;
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 8px;
+  padding: 4px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.badge-modalidade-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 6px 10px;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  color: #cbd5e1;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  cursor: pointer;
+  transition: background 0.1s ease, color 0.1s ease;
+}
+
+.badge-modalidade-option:hover {
+  background: #334155;
+  color: #ffffff;
+}
+
+.badge-modalidade-option.selected {
+  background: rgba(59, 130, 246, 0.2);
+  color: #60a5fa;
+}
+
+.dot-presencial {
+  background-color: #10b981 !important;
+  box-shadow: 0 0 4px #10b981 !important;
+}
+
+.dot-online {
+  background-color: #3b82f6 !important;
+  box-shadow: 0 0 4px #3b82f6 !important;
+}
+
+
 
 .badge-dot {
   width: 6px;
   height: 6px;
   border-radius: 50%;
   display: inline-block;
+  flex-shrink: 0;
 }
 
 .badge-modalidade.presencial {
@@ -1677,6 +1777,7 @@ tr.row-selected td {
   50% { transform: scale(1.25); opacity: 1; }
   100% { transform: scale(0.9); opacity: 0.7; }
 }
+
 
 .badge-graduado {
   display: inline-flex;

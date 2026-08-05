@@ -133,6 +133,104 @@ function CustomSelect({
   );
 }
 
+interface BadgeModalidadeSelectProps {
+  value: string;
+  onChange: (newValue: string) => void;
+  disabled?: boolean;
+}
+
+function BadgeModalidadeSelect({
+  value,
+  onChange,
+  disabled,
+}: BadgeModalidadeSelectProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = React.useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const isPresencial = value === "Presencial";
+
+  return (
+    <div className="badge-modalidade-container" ref={dropdownRef}>
+      <button
+        type="button"
+        disabled={disabled}
+        className={`badge-modalidade ${isPresencial ? "presencial" : "online"} ${
+          isOpen ? "open" : ""
+        }`}
+        onClick={(e) => {
+          e.stopPropagation();
+          setIsOpen(!isOpen);
+        }}
+        title="Alterar modalidade"
+      >
+        <span className="badge-dot"></span>
+        <span className="badge-text">{value}</span>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          className={`badge-chevron ${isOpen ? "open" : ""}`}
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          strokeWidth={2}
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M19 9l-7 7-7-7"
+          />
+        </svg>
+      </button>
+
+      {isOpen && (
+        <div className="badge-modalidade-dropdown">
+          <button
+            type="button"
+            className={`badge-modalidade-option ${
+              value === "Presencial" ? "selected" : ""
+            }`}
+            onClick={(e) => {
+              e.stopPropagation();
+              onChange("Presencial");
+              setIsOpen(false);
+            }}
+          >
+            <span className="badge-dot dot-presencial"></span>
+            <span>Presencial</span>
+          </button>
+
+          <button
+            type="button"
+            className={`badge-modalidade-option ${
+              value === "Online" ? "selected" : ""
+            }`}
+            onClick={(e) => {
+              e.stopPropagation();
+              onChange("Online");
+              setIsOpen(false);
+            }}
+          >
+            <span className="badge-dot dot-online"></span>
+            <span>Online</span>
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function AdminDashboard({
   initialInscritos,
   initialMetrics,
@@ -150,8 +248,10 @@ export default function AdminDashboard({
   const [filterDataFim, setFilterDataFim] = useState("");
 
   const [loading, setLoading] = useState(false);
+  const [updatingModalidadeId, setUpdatingModalidadeId] = useState<number | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
   const tableWrapperRef = React.useRef<HTMLDivElement>(null);
+  const isFirstRender = React.useRef(true);
 
   // Efeito de Grab-to-Scroll para arrastar a tabela com o mouse
   useEffect(() => {
@@ -168,8 +268,10 @@ export default function AdminDashboard({
       if (
         target.closest("button") ||
         target.closest("input") ||
+        target.closest("select") ||
         target.closest("a") ||
         target.closest(".custom-select-container") ||
+        target.closest(".badge-modalidade-container") ||
         target.closest("svg")
       ) {
         return;
@@ -212,8 +314,13 @@ export default function AdminDashboard({
     };
   }, []);
 
-  // Busca dados atualizados da API ao alterar filtros
+  // Busca dados atualizados da API ao alterar filtros (ignora a primeira renderização)
   useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+
     const fetchData = async () => {
       setLoading(true);
       try {
@@ -241,7 +348,6 @@ export default function AdminDashboard({
       }
     };
 
-    // Debounce na pesquisa por texto para evitar múltiplas requisições por segundo
     const timeout = setTimeout(() => {
       fetchData();
     }, 300);
@@ -254,6 +360,7 @@ export default function AdminDashboard({
     filterDataInicio,
     filterDataFim,
   ]);
+
 
   // Função para limpar filtros
   const handleClearFilters = () => {
@@ -322,6 +429,58 @@ export default function AdminDashboard({
       alert("Erro de conexão ao excluir participante.");
     }
   };
+
+  // Alteração de Modalidade (Presencial <-> Online)
+  const handleUpdateModalidade = async (
+    id: number,
+    currentModalidade: string,
+    newModalidade: string,
+  ) => {
+    if (currentModalidade === newModalidade) return;
+
+    setUpdatingModalidadeId(id);
+    try {
+      const response = await fetch("/api/admin/inscritos", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          id_inscrito: id,
+          ds_modalidade: newModalidade,
+        }),
+      });
+      const result = await response.json();
+
+      if (response.ok && result.success) {
+        // Atualiza estado local dos inscritos
+        setInscritos((prev) =>
+          prev.map((i) =>
+            i.id_inscrito === id ? { ...i, ds_modalidade: newModalidade } : i,
+          ),
+        );
+
+        // Atualiza as estatísticas no topo da tela
+        setMetrics((prev) => {
+          const presencialDiff = newModalidade === "Presencial" ? 1 : -1;
+          const onlineDiff = newModalidade === "Online" ? 1 : -1;
+          return {
+            ...prev,
+            presencial: Math.max(0, prev.presencial + presencialDiff),
+            online: Math.max(0, prev.online + onlineDiff),
+          };
+        });
+      } else {
+        alert(result.error || "Erro ao atualizar a modalidade.");
+      }
+    } catch (err) {
+      console.error("Erro ao atualizar modalidade:", err);
+      alert("Erro de conexão ao alterar a modalidade.");
+    } finally {
+      setUpdatingModalidadeId(null);
+    }
+  };
+
 
   // Exportar para Excel/CSV usando separador ponto e vírgula e BOM (compatível com Excel PT-BR)
   const handleExportCSV = () => {
@@ -760,16 +919,24 @@ export default function AdminDashboard({
                       </td>
                       <td>{i.ds_crmv || <span className="text-empty-dash">-</span>}</td>
                       <td>
-                        <span
-                          className={`badge-modalidade ${
-                            i.ds_modalidade === "Presencial"
-                              ? "presencial"
-                              : "online"
-                          }`}
-                        >
-                          <span className="badge-dot"></span>
-                          {i.ds_modalidade}
-                        </span>
+                        {updatingModalidadeId === i.id_inscrito ? (
+                          <span className="badge-modalidade loading">
+                            <span className="spinner-loader-small"></span>
+                            Salvando...
+                          </span>
+                        ) : (
+                          <BadgeModalidadeSelect
+                            value={i.ds_modalidade}
+                            onChange={(newVal) =>
+                              handleUpdateModalidade(
+                                i.id_inscrito,
+                                i.ds_modalidade,
+                                newVal,
+                              )
+                            }
+                            disabled={updatingModalidadeId === i.id_inscrito}
+                          />
+                        )}
                       </td>
                       <td className="cell-date">
                         {new Date(i.dt_cadastro).toLocaleString("pt-BR", {
@@ -811,16 +978,24 @@ export default function AdminDashboard({
                         />
                         <span className="mobile-card-name">{i.nm_inscrito}</span>
                       </div>
-                      <span
-                        className={`badge-modalidade ${
-                          i.ds_modalidade === "Presencial"
-                            ? "presencial"
-                            : "online"
-                        }`}
-                      >
-                        <span className="badge-dot"></span>
-                        {i.ds_modalidade}
-                      </span>
+                      {updatingModalidadeId === i.id_inscrito ? (
+                        <span className="badge-modalidade loading">
+                          <span className="spinner-loader-small"></span>
+                          Salvando...
+                        </span>
+                      ) : (
+                        <BadgeModalidadeSelect
+                          value={i.ds_modalidade}
+                          onChange={(newVal) =>
+                            handleUpdateModalidade(
+                              i.id_inscrito,
+                              i.ds_modalidade,
+                              newVal,
+                            )
+                          }
+                          disabled={updatingModalidadeId === i.id_inscrito}
+                        />
+                      )}
                     </div>
 
                     <div className="mobile-card-body">

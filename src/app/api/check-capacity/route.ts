@@ -19,13 +19,13 @@ export async function GET() {
     }
 
     const currentCount = count || 0;
-    const isFull = currentCount >= 500;
+    const isFull = currentCount >= 400;
 
     return NextResponse.json({
       success: true,
       presencialFull: isFull,
       count: currentCount,
-      limit: 500,
+      limit: 400,
     });
   } catch (error) {
     console.error("Erro interno na rota check-capacity:", error);

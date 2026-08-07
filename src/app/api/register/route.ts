@@ -136,7 +136,7 @@ export async function POST(request: Request) {
         throw countError;
       }
 
-      if (count !== null && count >= 500) {
+      if (count !== null && count >= 400) {
         return NextResponse.json(
           {
             error:

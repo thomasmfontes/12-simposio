@@ -250,8 +250,47 @@ export default function AdminDashboard({
   const [loading, setLoading] = useState(false);
   const [updatingModalidadeId, setUpdatingModalidadeId] = useState<number | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
+  const [presencialLocked, setPresencialLocked] = useState(true);
   const tableWrapperRef = React.useRef<HTMLDivElement>(null);
   const isFirstRender = React.useRef(true);
+
+  // Efeito para carregar o status de travamento das inscrições presenciais
+  useEffect(() => {
+    async function fetchSettings() {
+      try {
+        const res = await fetch("/api/admin/settings");
+        if (res.ok) {
+          const data = await res.json();
+          if (typeof data.presencialLocked === "boolean") {
+            setPresencialLocked(data.presencialLocked);
+          }
+        }
+      } catch (err) {
+        console.error("Erro ao carregar configurações do admin:", err);
+      }
+    }
+    fetchSettings();
+  }, []);
+
+  const handleToggleLock = async () => {
+    const newLocked = !presencialLocked;
+    setPresencialLocked(newLocked);
+    try {
+      const res = await fetch("/api/admin/settings", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ presencialLocked: newLocked }),
+      });
+      if (!res.ok) {
+        setPresencialLocked(!newLocked);
+        alert("Erro ao alterar o status das inscrições presenciais.");
+      }
+    } catch (err) {
+      setPresencialLocked(!newLocked);
+      console.error(err);
+      alert("Erro ao conectar ao servidor.");
+    }
+  };
 
   // Efeito de Grab-to-Scroll para arrastar a tabela com o mouse
   useEffect(() => {
@@ -652,7 +691,45 @@ export default function AdminDashboard({
           <h1>Painel Administrativo</h1>
           <p>Gerenciamento e monitoramento de inscritos no 12º Simpósio</p>
         </div>
-        <div className="admin-actions">
+        <div className="admin-actions" style={{ display: "flex", gap: "12px", alignItems: "center" }}>
+          <button
+            type="button"
+            onClick={handleToggleLock}
+            className="btn-outline"
+            style={{
+              background: presencialLocked ? "rgba(239, 68, 68, 0.1)" : "rgba(34, 197, 94, 0.1)",
+              borderColor: presencialLocked ? "#ef4444" : "#22c55e",
+              color: presencialLocked ? "#f87171" : "#4ade80",
+              fontWeight: 700,
+              padding: "10px 18px",
+              borderRadius: "10px",
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              cursor: "pointer",
+              transition: "all 0.2s",
+              fontSize: "14px",
+            }}
+            title={presencialLocked ? "Clique para liberar vagas presenciais" : "Clique para travar vagas presenciais"}
+          >
+            {presencialLocked ? (
+              <>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                </svg>
+                <span>Presencial: TRAVADO</span>
+              </>
+            ) : (
+              <>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                  <path d="M7 11V7a5 5 0 0 1 9.9-1" />
+                </svg>
+                <span>Presencial: ABERTO</span>
+              </>
+            )}
+          </button>
           <button className="btn-outline btn-logout" onClick={handleLogout}>
             <svg xmlns="http://www.w3.org/2000/svg" className="btn-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />

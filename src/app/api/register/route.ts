@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import db from "@/lib/db";
 import { Resend } from "resend";
+import { isPresencialLocked } from "@/lib/settings";
 
 export async function POST(request: Request) {
   try {
@@ -124,8 +125,10 @@ export async function POST(request: Request) {
     // 2. Validação contra duplicados
     const emailClean = ds_email.trim().toLowerCase();
 
-    // Verificação de capacidade para inscrições presenciais
+    // Verificação de capacidade e travamento para inscrições presenciais
     if (ds_modalidade === "Presencial") {
+      const isLocked = await isPresencialLocked();
+
       const { count, error: countError } = await db
         .from("t_inscritos")
         .select("id_inscrito", { count: "exact", head: true })
@@ -136,7 +139,7 @@ export async function POST(request: Request) {
         throw countError;
       }
 
-      if (count !== null && count >= 400) {
+      if (isLocked || (count !== null && count >= 400)) {
         return NextResponse.json(
           {
             error:

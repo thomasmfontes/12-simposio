@@ -593,7 +593,15 @@ a:hover {
 .radio-option.disabled,
 .checkbox-option.disabled {
   opacity: 0.5;
-  cursor: not-allowed;
+  cursor: not-allowed !important;
+  pointer-events: none !important;
+  filter: grayscale(1);
+}
+
+.radio-option.disabled input,
+.checkbox-option.disabled input {
+  cursor: not-allowed !important;
+  pointer-events: none !important;
 }
 
 .radio-option input[type="radio"],

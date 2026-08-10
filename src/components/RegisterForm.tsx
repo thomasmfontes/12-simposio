@@ -94,10 +94,10 @@ export default function RegisterForm({ lang, onSuccess }: RegisterFormProps) {
   });
   const [comoSoubeOutro, setComoSoubeOutro] = useState("");
 
-  const [modalidade, setModalidade] = useState(""); // Presencial / Online
+  const [modalidade, setModalidade] = useState("Online"); // Padrão: Online
   const [lgpdAceite, setLgpdAceite] = useState(false);
   const [comunicacoesAceite, setComunicacoesAceite] = useState(false);
-  const [presencialFull, setPresencialFull] = useState(false);
+  const [presencialFull, setPresencialFull] = useState(true); // Padrão: Travado/Esgotado
 
   // Seletor de país/bandeira para o campo de telefone e país
   const [openPhoneDropdown, setOpenPhoneDropdown] = useState(false);
@@ -149,16 +149,16 @@ export default function RegisterForm({ lang, onSuccess }: RegisterFormProps) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Efeito para verificar a capacidade de inscrições presenciais
+  // Efeito para verificar a capacidade e status do evento
   useEffect(() => {
     async function checkCapacity() {
       try {
         const res = await fetch("/api/check-capacity");
         if (res.ok) {
           const data = await res.json();
-          if (data.presencialFull) {
-            setPresencialFull(true);
-            // Se presencial estiver cheio, seleciona automaticamente Online
+          const isLockedOrFull = data.presencialFull === true || data.presencialLocked === true;
+          setPresencialFull(isLockedOrFull);
+          if (isLockedOrFull) {
             setModalidade("Online");
           }
         }

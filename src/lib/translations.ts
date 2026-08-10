@@ -79,7 +79,11 @@ export const translations = {
       btnSubmit: "INSCREVA-SE",
       processing: "Processando...",
       soldOutLabel: "ESGOTADO",
+      closedTitle: "INSCRIÇÕES ENCERRADAS",
+      closedSubtitle: "As inscrições para o 12º Simpósio de Clínica Médica e Nutrologia Premierpet estão encerradas.",
+      closedMessage: "Agradecemos o seu interesse! Acompanhe nossas redes sociais para futuras novidades e informações sobre o evento.",
       errors: {
+        registrationClosed: "As inscrições para o evento estão encerradas.",
         presencialSoldOut: "As vagas presenciais estão esgotadas. Selecione a modalidade Online.",
         nameRequired: "Nome completo é obrigatório.",
         dobInvalid: "Data de nascimento inválida. Digite dia (DD), mês (MM) e ano (AAAA) corretamente.",
@@ -265,7 +269,11 @@ export const translations = {
       btnSubmit: "INSCRÍBASE",
       processing: "Procesando...",
       soldOutLabel: "AGOTADO",
+      closedTitle: "INSCRIPCIONES CERRADAS",
+      closedSubtitle: "Las inscripciones para el 12º Simposio de Clínica Médica y Nutrología Premierpet están cerradas.",
+      closedMessage: "¡Agradecemos su interés! Siga nuestras redes sociales para futuras novedades e información sobre el evento.",
       errors: {
+        registrationClosed: "Las inscripciones para el evento están cerradas.",
         presencialSoldOut: "Los cupos presenciales se han agotado. Seleccione la modalidad Online.",
         nameRequired: "El nombre completo es obligatorio.",
         dobInvalid: "Fecha de nacimiento inválida. Ingrese el día (DD), mes (MM) y año (AAAA) correctamente.",

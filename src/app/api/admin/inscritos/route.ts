@@ -15,41 +15,62 @@ export async function GET(request: Request) {
   const dataInicio = searchParams.get("data_inicio") || "";
   const dataFim = searchParams.get("data_fim") || "";
 
+  const isAll = searchParams.get("all") === "true";
+  const page = Math.max(1, parseInt(searchParams.get("page") || "1", 10));
+  const limit = Math.max(1, parseInt(searchParams.get("limit") || "50", 10));
+
   try {
-    // 2. Monta query dinâmica de busca
-    let queryBuilder = db
-      .from("t_inscritos")
-      .select("*");
+    // 2. Monta query dinâmica de busca para dados e para contagem exata dos filtrados
+    let queryBuilder = db.from("t_inscritos").select("*");
+    let countQuery = db.from("t_inscritos").select("*", { count: "exact", head: true });
 
     if (q.trim()) {
-      queryBuilder = queryBuilder.or(`nm_inscrito.ilike.%${q.trim()}%,ds_email.ilike.%${q.trim()}%`);
+      const filterStr = `nm_inscrito.ilike.%${q.trim()}%,ds_email.ilike.%${q.trim()}%`;
+      queryBuilder = queryBuilder.or(filterStr);
+      countQuery = countQuery.or(filterStr);
     }
 
     if (cidade.trim()) {
       queryBuilder = queryBuilder.eq("nm_cidade", cidade.trim());
+      countQuery = countQuery.eq("nm_cidade", cidade.trim());
     }
 
     if (modalidade.trim()) {
       queryBuilder = queryBuilder.eq("ds_modalidade", modalidade.trim());
+      countQuery = countQuery.eq("ds_modalidade", modalidade.trim());
     }
 
     if (dataInicio) {
-      queryBuilder = queryBuilder.gte("dt_cadastro", `${dataInicio}T00:00:00.000Z`);
+      const gteVal = `${dataInicio}T00:00:00.000Z`;
+      queryBuilder = queryBuilder.gte("dt_cadastro", gteVal);
+      countQuery = countQuery.gte("dt_cadastro", gteVal);
     }
 
     if (dataFim) {
-      queryBuilder = queryBuilder.lte("dt_cadastro", `${dataFim}T23:59:59.999Z`);
+      const lteVal = `${dataFim}T23:59:59.999Z`;
+      queryBuilder = queryBuilder.lte("dt_cadastro", lteVal);
+      countQuery = countQuery.lte("dt_cadastro", lteVal);
     }
 
-    // Ordena do mais recente para o mais antigo e contorna o limite padrão de 1000 registros do Supabase
-    queryBuilder = queryBuilder
-      .order("dt_cadastro", { ascending: false })
-      .range(0, 9999);
+    // Ordenação e paginação
+    if (isAll) {
+      queryBuilder = queryBuilder.order("dt_cadastro", { ascending: false }).range(0, 9999);
+    } else {
+      const offset = (page - 1) * limit;
+      queryBuilder = queryBuilder.order("dt_cadastro", { ascending: false }).range(offset, offset + limit - 1);
+    }
 
-    const { data: inscritos, error: fetchError } = await queryBuilder;
+    // Executa requisição dos dados e contagem filtrada em paralelo
+    const [{ data: inscritos, error: fetchError }, { count: filteredCount, error: countFilteredError }] =
+      await Promise.all([queryBuilder, countQuery]);
+
     if (fetchError) {
       console.error("Erro ao buscar inscritos no Supabase:", fetchError);
       throw fetchError;
+    }
+    if (countFilteredError) {
+      console.error("Erro ao contar inscritos filtrados no Supabase:", countFilteredError);
+      throw countFilteredError;
     }
 
     // 3. Estatísticas Gerais (não afetadas pelos filtros da tabela)
@@ -66,6 +87,8 @@ export async function GET(request: Request) {
     const totalCount = totalRes.count || 0;
     const presencialCount = presencialRes.count || 0;
     const onlineCount = onlineRes.count || 0;
+    const totalFiltered = filteredCount || 0;
+    const totalPages = isAll ? 1 : Math.max(1, Math.ceil(totalFiltered / limit));
 
     // 4. Lista de cidades distintas para preencher o filtro do painel
     const { data: allCities, error: citiesError } = await db
@@ -84,6 +107,10 @@ export async function GET(request: Request) {
     return NextResponse.json({
       success: true,
       data: inscritos,
+      totalFiltered,
+      page: isAll ? 1 : page,
+      limit: isAll ? totalFiltered : limit,
+      totalPages,
       metrics: {
         total: totalCount,
         presencial: presencialCount,
@@ -194,4 +221,3 @@ export async function PATCH(request: Request) {
     );
   }
 }
-

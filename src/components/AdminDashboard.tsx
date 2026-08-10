@@ -241,6 +241,12 @@ export default function AdminDashboard({
   const [metrics, setMetrics] = useState<Metrics>(initialMetrics);
   const [cidades, setCidades] = useState<string[]>(initialCidades);
 
+  // Estados de Paginação
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(50);
+  const [totalFiltered, setTotalFiltered] = useState(initialInscritos.length);
+  const [totalPages, setTotalPages] = useState(Math.max(1, Math.ceil(initialInscritos.length / 50)));
+
   const [filterSearch, setFilterSearch] = useState("");
   const [filterCidade, setFilterCidade] = useState("");
   const [filterModalidade, setFilterModalidade] = useState("");
@@ -353,7 +359,12 @@ export default function AdminDashboard({
     };
   }, []);
 
-  // Busca dados atualizados da API ao alterar filtros (ignora a primeira renderização)
+  // Reseta para a primeira página ao alterar os filtros
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filterSearch, filterCidade, filterModalidade, filterDataInicio, filterDataFim]);
+
+  // Busca dados atualizados da API ao alterar filtros ou página (ignora a primeira renderização)
   useEffect(() => {
     if (isFirstRender.current) {
       isFirstRender.current = false;
@@ -369,6 +380,8 @@ export default function AdminDashboard({
         if (filterModalidade) queryParams.set("modalidade", filterModalidade);
         if (filterDataInicio) queryParams.set("data_inicio", filterDataInicio);
         if (filterDataFim) queryParams.set("data_fim", filterDataFim);
+        queryParams.set("page", String(currentPage));
+        queryParams.set("limit", String(pageSize));
 
         const response = await fetch(
           `/api/admin/inscritos?${queryParams.toString()}`,
@@ -379,6 +392,8 @@ export default function AdminDashboard({
           setInscritos(result.data);
           setMetrics(result.metrics);
           setCidades(result.cidades);
+          setTotalFiltered(result.totalFiltered);
+          setTotalPages(result.totalPages);
         }
       } catch (err) {
         console.error("Erro ao filtrar dados:", err);
@@ -398,6 +413,8 @@ export default function AdminDashboard({
     filterModalidade,
     filterDataInicio,
     filterDataFim,
+    currentPage,
+    pageSize,
   ]);
 
 
@@ -521,9 +538,34 @@ export default function AdminDashboard({
   };
 
 
+  // Busca todos os registros correspondentes aos filtros atuais (sem paginação) para exportar CSV ou PDF
+  const fetchAllForAction = async (): Promise<InscritoData[]> => {
+    try {
+      const queryParams = new URLSearchParams();
+      queryParams.set("all", "true");
+      if (filterSearch) queryParams.set("q", filterSearch);
+      if (filterCidade) queryParams.set("cidade", filterCidade);
+      if (filterModalidade) queryParams.set("modalidade", filterModalidade);
+      if (filterDataInicio) queryParams.set("data_inicio", filterDataInicio);
+      if (filterDataFim) queryParams.set("data_fim", filterDataFim);
+
+      const response = await fetch(
+        `/api/admin/inscritos?${queryParams.toString()}`
+      );
+      const result = await response.json();
+      if (response.ok && result.success) {
+        return result.data;
+      }
+    } catch (err) {
+      console.error("Erro ao buscar dados completos para exportação/crachás:", err);
+    }
+    return inscritos;
+  };
+
   // Exportar para Excel/CSV usando separador ponto e vírgula e BOM (compatível com Excel PT-BR)
-  const handleExportCSV = () => {
-    if (inscritos.length === 0) {
+  const handleExportCSV = async () => {
+    const listToExport = await fetchAllForAction();
+    if (listToExport.length === 0) {
       alert("Nenhum registro para exportar.");
       return;
     }
@@ -547,7 +589,7 @@ export default function AdminDashboard({
       "Data Cadastro",
     ];
 
-    const rows = inscritos.map((p) => [
+    const rows = listToExport.map((p) => [
       p.id_inscrito,
       p.nm_inscrito,
       p.dt_nascimento,
@@ -591,10 +633,11 @@ export default function AdminDashboard({
   };
 
   // Gerar Crachás em PDF (8x4 cm = 80mm x 40mm)
-  const handleGenerateBadges = (onlySelected: boolean) => {
+  const handleGenerateBadges = async (onlySelected: boolean) => {
+    const fullList = onlySelected ? inscritos : await fetchAllForAction();
     const listToGenerate = onlySelected
-      ? inscritos.filter((i) => selectedIds.has(i.id_inscrito))
-      : inscritos;
+      ? fullList.filter((i) => selectedIds.has(i.id_inscrito))
+      : fullList;
 
     if (listToGenerate.length === 0) {
       alert("Selecione pelo menos um participante para gerar o crachá.");
@@ -889,7 +932,7 @@ export default function AdminDashboard({
         <div className="table-header-bar">
           <div className="table-header-title">
             Lista de Inscritos
-            <span className="table-counter-badge">{inscritos.length}</span>
+            <span className="table-counter-badge">{totalFiltered}</span>
           </div>
 
           <div className="table-selection-actions">
@@ -917,12 +960,12 @@ export default function AdminDashboard({
             <button
               className="btn-outline btn-with-icon"
               onClick={() => handleGenerateBadges(false)}
-              disabled={inscritos.length === 0}
+              disabled={totalFiltered === 0}
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="btn-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
               </svg>
-              Crachás Todos ({inscritos.length})
+              Crachás Todos ({totalFiltered})
             </button>
           </div>
         </div>
@@ -1141,6 +1184,118 @@ export default function AdminDashboard({
             </>
           )}
         </div>
+
+        {/* Barra de Paginação */}
+        {totalFiltered > 0 && (
+          <div
+            className="pagination-bar"
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              flexWrap: "wrap",
+              gap: "16px",
+              padding: "16px 24px",
+              borderTop: "1px solid rgba(255, 255, 255, 0.08)",
+              background: "rgba(15, 23, 42, 0.6)",
+              borderRadius: "0 0 16px 16px",
+            }}
+          >
+            <div style={{ fontSize: "14px", color: "var(--form-text-muted)" }}>
+              Exibindo{" "}
+              <strong style={{ color: "#ffffff" }}>
+                {totalFiltered > 0 ? (currentPage - 1) * pageSize + 1 : 0}
+              </strong>
+              –
+              <strong style={{ color: "#ffffff" }}>
+                {Math.min(currentPage * pageSize, totalFiltered)}
+              </strong>{" "}
+              de <strong style={{ color: "#ffffff" }}>{totalFiltered}</strong> inscritos
+            </div>
+
+            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                <span style={{ fontSize: "13px", color: "var(--form-text-muted)" }}>
+                  Por página:
+                </span>
+                <select
+                  value={pageSize}
+                  onChange={(e) => {
+                    setPageSize(Number(e.target.value));
+                    setCurrentPage(1);
+                  }}
+                  style={{
+                    background: "rgba(30, 41, 59, 0.9)",
+                    border: "1px solid rgba(255, 255, 255, 0.15)",
+                    color: "#ffffff",
+                    padding: "6px 10px",
+                    borderRadius: "8px",
+                    fontSize: "13px",
+                    cursor: "pointer",
+                    outline: "none",
+                  }}
+                >
+                  <option value={25}>25</option>
+                  <option value={50}>50</option>
+                  <option value={100}>100</option>
+                </select>
+              </div>
+
+              <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
+                <button
+                  disabled={currentPage === 1 || loading}
+                  onClick={() => {
+                    setCurrentPage((p) => Math.max(1, p - 1));
+                    if (tableWrapperRef.current) {
+                      tableWrapperRef.current.scrollTop = 0;
+                    }
+                  }}
+                  className="btn-outline"
+                  style={{
+                    padding: "6px 14px",
+                    borderRadius: "8px",
+                    fontSize: "13px",
+                    cursor: currentPage === 1 || loading ? "not-allowed" : "pointer",
+                    opacity: currentPage === 1 || loading ? 0.4 : 1,
+                  }}
+                >
+                  ← Anterior
+                </button>
+
+                <span
+                  style={{
+                    fontSize: "13px",
+                    color: "#e2e8f0",
+                    fontWeight: 600,
+                    padding: "0 8px",
+                  }}
+                >
+                  Página {currentPage} de {totalPages}
+                </span>
+
+                <button
+                  disabled={currentPage >= totalPages || loading}
+                  onClick={() => {
+                    setCurrentPage((p) => Math.min(totalPages, p + 1));
+                    if (tableWrapperRef.current) {
+                      tableWrapperRef.current.scrollTop = 0;
+                    }
+                  }}
+                  className="btn-outline"
+                  style={{
+                    padding: "6px 14px",
+                    borderRadius: "8px",
+                    fontSize: "13px",
+                    cursor: currentPage >= totalPages || loading ? "not-allowed" : "pointer",
+                    opacity: currentPage >= totalPages || loading ? 0.4 : 1,
+                  }}
+                >
+                  Próximo →
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

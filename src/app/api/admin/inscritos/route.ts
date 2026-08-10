@@ -41,8 +41,10 @@ export async function GET(request: Request) {
       queryBuilder = queryBuilder.lte("dt_cadastro", `${dataFim}T23:59:59.999Z`);
     }
 
-    // Ordena do mais recente para o mais antigo
-    queryBuilder = queryBuilder.order("dt_cadastro", { ascending: false });
+    // Ordena do mais recente para o mais antigo e contorna o limite padrão de 1000 registros do Supabase
+    queryBuilder = queryBuilder
+      .order("dt_cadastro", { ascending: false })
+      .range(0, 9999);
 
     const { data: inscritos, error: fetchError } = await queryBuilder;
     if (fetchError) {

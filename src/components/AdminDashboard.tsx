@@ -1195,27 +1195,23 @@ export default function AdminDashboard({
               alignItems: "center",
               flexWrap: "wrap",
               gap: "16px",
-              padding: "16px 24px",
+              padding: "18px 24px",
               borderTop: "1px solid rgba(255, 255, 255, 0.08)",
-              background: "rgba(15, 23, 42, 0.6)",
+              background: "linear-gradient(180deg, rgba(15, 23, 42, 0.4) 0%, rgba(15, 23, 42, 0.8) 100%)",
               borderRadius: "0 0 16px 16px",
             }}
           >
-            <div style={{ fontSize: "14px", color: "var(--form-text-muted)" }}>
+            <div style={{ fontSize: "13px", color: "#94a3b8", fontWeight: 500 }}>
               Exibindo{" "}
-              <strong style={{ color: "#ffffff" }}>
-                {totalFiltered > 0 ? (currentPage - 1) * pageSize + 1 : 0}
-              </strong>
-              –
-              <strong style={{ color: "#ffffff" }}>
-                {Math.min(currentPage * pageSize, totalFiltered)}
+              <strong style={{ color: "#ffffff", fontWeight: 700 }}>
+                {totalFiltered > 0 ? (currentPage - 1) * pageSize + 1 : 0} – {Math.min(currentPage * pageSize, totalFiltered)}
               </strong>{" "}
-              de <strong style={{ color: "#ffffff" }}>{totalFiltered}</strong> inscritos
+              de <strong style={{ color: "#ffffff", fontWeight: 700 }}>{totalFiltered}</strong> inscritos
             </div>
 
-            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                <span style={{ fontSize: "13px", color: "var(--form-text-muted)" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                <span style={{ fontSize: "13px", color: "#94a3b8", fontWeight: 500 }}>
                   Por página:
                 </span>
                 <select
@@ -1225,14 +1221,16 @@ export default function AdminDashboard({
                     setCurrentPage(1);
                   }}
                   style={{
-                    background: "rgba(30, 41, 59, 0.9)",
-                    border: "1px solid rgba(255, 255, 255, 0.15)",
+                    background: "rgba(30, 41, 59, 0.8)",
+                    border: "1px solid rgba(255, 255, 255, 0.12)",
                     color: "#ffffff",
-                    padding: "6px 10px",
-                    borderRadius: "8px",
+                    padding: "6px 12px",
+                    borderRadius: "10px",
                     fontSize: "13px",
+                    fontWeight: 600,
                     cursor: "pointer",
                     outline: "none",
+                    transition: "border-color 0.2s",
                   }}
                 >
                   <option value={25}>25</option>
@@ -1241,7 +1239,7 @@ export default function AdminDashboard({
                 </select>
               </div>
 
-              <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
+              <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
                 <button
                   disabled={currentPage === 1 || loading}
                   onClick={() => {
@@ -1252,26 +1250,37 @@ export default function AdminDashboard({
                   }}
                   className="btn-outline"
                   style={{
-                    padding: "6px 14px",
-                    borderRadius: "8px",
+                    padding: "7px 16px",
+                    borderRadius: "10px",
                     fontSize: "13px",
+                    fontWeight: 600,
                     cursor: currentPage === 1 || loading ? "not-allowed" : "pointer",
-                    opacity: currentPage === 1 || loading ? 0.4 : 1,
+                    opacity: currentPage === 1 || loading ? 0.35 : 1,
+                    transition: "all 0.2s ease",
                   }}
                 >
-                  ← Anterior
+                  Anterior
                 </button>
 
-                <span
+                <div
                   style={{
+                    padding: "6px 14px",
+                    borderRadius: "20px",
+                    background: "rgba(255, 255, 255, 0.05)",
+                    border: "1px solid rgba(255, 255, 255, 0.08)",
                     fontSize: "13px",
-                    color: "#e2e8f0",
-                    fontWeight: 600,
-                    padding: "0 8px",
+                    color: "#94a3b8",
+                    fontWeight: 500,
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "4px",
                   }}
                 >
-                  Página {currentPage} de {totalPages}
-                </span>
+                  <span>Página</span>
+                  <strong style={{ color: "#38bdf8", fontWeight: 700 }}>{currentPage}</strong>
+                  <span>de</span>
+                  <strong style={{ color: "#ffffff", fontWeight: 600 }}>{totalPages}</strong>
+                </div>
 
                 <button
                   disabled={currentPage >= totalPages || loading}
@@ -1283,14 +1292,16 @@ export default function AdminDashboard({
                   }}
                   className="btn-outline"
                   style={{
-                    padding: "6px 14px",
-                    borderRadius: "8px",
+                    padding: "7px 16px",
+                    borderRadius: "10px",
                     fontSize: "13px",
+                    fontWeight: 600,
                     cursor: currentPage >= totalPages || loading ? "not-allowed" : "pointer",
-                    opacity: currentPage >= totalPages || loading ? 0.4 : 1,
+                    opacity: currentPage >= totalPages || loading ? 0.35 : 1,
+                    transition: "all 0.2s ease",
                   }}
                 >
-                  Próximo →
+                  Próximo
                 </button>
               </div>
             </div>

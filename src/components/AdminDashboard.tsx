@@ -33,6 +33,7 @@ interface AdminDashboardProps {
   initialInscritos: InscritoData[];
   initialMetrics: Metrics;
   initialCidades: string[];
+  initialTotalFiltered?: number;
 }
 
 interface CustomSelectProps {
@@ -235,6 +236,7 @@ export default function AdminDashboard({
   initialInscritos,
   initialMetrics,
   initialCidades,
+  initialTotalFiltered,
 }: AdminDashboardProps) {
   // Estados para dados e filtros
   const [inscritos, setInscritos] = useState<InscritoData[]>(initialInscritos);
@@ -244,8 +246,9 @@ export default function AdminDashboard({
   // Estados de Paginação
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(50);
-  const [totalFiltered, setTotalFiltered] = useState(initialInscritos.length);
-  const [totalPages, setTotalPages] = useState(Math.max(1, Math.ceil(initialInscritos.length / 50)));
+  const initialCount = initialTotalFiltered ?? initialMetrics.total ?? initialInscritos.length;
+  const [totalFiltered, setTotalFiltered] = useState(initialCount);
+  const [totalPages, setTotalPages] = useState(Math.max(1, Math.ceil(initialCount / 50)));
 
   const [filterSearch, setFilterSearch] = useState("");
   const [filterCidade, setFilterCidade] = useState("");
@@ -254,6 +257,8 @@ export default function AdminDashboard({
   const [filterDataFim, setFilterDataFim] = useState("");
 
   const [loading, setLoading] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
+  const [isGeneratingBadges, setIsGeneratingBadges] = useState(false);
   const [updatingModalidadeId, setUpdatingModalidadeId] = useState<number | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
   const [presencialLocked, setPresencialLocked] = useState(true);
@@ -564,85 +569,95 @@ export default function AdminDashboard({
 
   // Exportar para Excel/CSV usando separador ponto e vírgula e BOM (compatível com Excel PT-BR)
   const handleExportCSV = async () => {
-    const listToExport = await fetchAllForAction();
-    if (listToExport.length === 0) {
-      alert("Nenhum registro para exportar.");
-      return;
+    setIsExporting(true);
+    try {
+      const listToExport = await fetchAllForAction();
+      if (listToExport.length === 0) {
+        alert("Nenhum registro para exportar.");
+        return;
+      }
+
+      const headers = [
+        "ID",
+        "Nome Completo",
+        "Data Nascimento",
+        "E-mail",
+        "Telefone",
+        "País",
+        "Cidade",
+        "Graduado",
+        "Curso",
+        "CRMV",
+        "Como soube",
+        "Outros detalhes",
+        "Modalidade",
+        "Aceite LGPD",
+        "Receber Comunicações",
+        "Data Cadastro",
+      ];
+
+      const rows = listToExport.map((p) => [
+        p.id_inscrito,
+        p.nm_inscrito,
+        p.dt_nascimento,
+        p.ds_email,
+        p.nu_telefone,
+        p.nm_pais,
+        p.nm_cidade,
+        p.fl_graduado === 1 ? "Sim" : "Não",
+        p.ds_curso_graduacao || "",
+        p.ds_crmv || "",
+        p.ds_como_soube,
+        p.ds_como_soube_outro || "",
+        p.ds_modalidade,
+        p.fl_lgpd_aceite === 1 ? "Sim" : "Não",
+        p.fl_comunicacoes_aceite === 1 ? "Sim" : "Não",
+        p.dt_cadastro,
+      ]);
+
+      // O prefixo \uFEFF força o Excel a interpretar o arquivo como UTF-8 com acentuações corretas
+      const csvContent =
+        "\uFEFF" +
+        [
+          headers.join(";"),
+          ...rows.map((row) =>
+            row.map((val) => `"${String(val).replace(/"/g, '""')}"`).join(";"),
+          ),
+        ].join("\n");
+
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.setAttribute("href", url);
+      link.setAttribute(
+        "download",
+        `inscritos_12_simposio_${new Date().toISOString().split("T")[0]}.csv`,
+      );
+      link.style.visibility = "hidden";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (err) {
+      console.error("Erro ao exportar CSV:", err);
+      alert("Erro ao exportar CSV.");
+    } finally {
+      setIsExporting(false);
     }
-
-    const headers = [
-      "ID",
-      "Nome Completo",
-      "Data Nascimento",
-      "E-mail",
-      "Telefone",
-      "País",
-      "Cidade",
-      "Graduado",
-      "Curso",
-      "CRMV",
-      "Como soube",
-      "Outros detalhes",
-      "Modalidade",
-      "Aceite LGPD",
-      "Receber Comunicações",
-      "Data Cadastro",
-    ];
-
-    const rows = listToExport.map((p) => [
-      p.id_inscrito,
-      p.nm_inscrito,
-      p.dt_nascimento,
-      p.ds_email,
-      p.nu_telefone,
-      p.nm_pais,
-      p.nm_cidade,
-      p.fl_graduado === 1 ? "Sim" : "Não",
-      p.ds_curso_graduacao || "",
-      p.ds_crmv || "",
-      p.ds_como_soube,
-      p.ds_como_soube_outro || "",
-      p.ds_modalidade,
-      p.fl_lgpd_aceite === 1 ? "Sim" : "Não",
-      p.fl_comunicacoes_aceite === 1 ? "Sim" : "Não",
-      p.dt_cadastro,
-    ]);
-
-    // O prefixo \uFEFF força o Excel a interpretar o arquivo como UTF-8 com acentuações corretas
-    const csvContent =
-      "\uFEFF" +
-      [
-        headers.join(";"),
-        ...rows.map((row) =>
-          row.map((val) => `"${String(val).replace(/"/g, '""')}"`).join(";"),
-        ),
-      ].join("\n");
-
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.setAttribute("href", url);
-    link.setAttribute(
-      "download",
-      `inscritos_12_simposio_${new Date().toISOString().split("T")[0]}.csv`,
-    );
-    link.style.visibility = "hidden";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
   };
 
   // Gerar Crachás em PDF (8x4 cm = 80mm x 40mm)
   const handleGenerateBadges = async (onlySelected: boolean) => {
-    const fullList = onlySelected ? inscritos : await fetchAllForAction();
-    const listToGenerate = onlySelected
-      ? fullList.filter((i) => selectedIds.has(i.id_inscrito))
-      : fullList;
+    setIsGeneratingBadges(true);
+    try {
+      const fullList = onlySelected ? inscritos : await fetchAllForAction();
+      const listToGenerate = onlySelected
+        ? fullList.filter((i) => selectedIds.has(i.id_inscrito))
+        : fullList;
 
-    if (listToGenerate.length === 0) {
-      alert("Selecione pelo menos um participante para gerar o crachá.");
-      return;
-    }
+      if (listToGenerate.length === 0) {
+        alert("Selecione pelo menos um participante para gerar o crachá.");
+        return;
+      }
 
     // Inicializa o PDF com tamanho personalizado 80x40 mm em formato paisagem (landscape)
     const doc = new jsPDF({
@@ -718,6 +733,12 @@ export default function AdminDashboard({
     });
 
     doc.save(`crachas_8x4_${listToGenerate.length}_participantes.pdf`);
+    } catch (err) {
+      console.error("Erro ao gerar crachás:", err);
+      alert("Erro ao gerar crachás.");
+    } finally {
+      setIsGeneratingBadges(false);
+    }
   };
 
   const handleLogout = async () => {
@@ -937,22 +958,34 @@ export default function AdminDashboard({
 
           <div className="table-selection-actions">
             {/* Exportar CSV */}
-            <button className="btn-outline btn-with-icon" onClick={handleExportCSV}>
-              <svg xmlns="http://www.w3.org/2000/svg" className="btn-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-              </svg>
-              Exportar CSV
+            <button
+              className="btn-outline btn-with-icon"
+              onClick={handleExportCSV}
+              disabled={isExporting || totalFiltered === 0}
+            >
+              {isExporting ? (
+                <span className="spinner-loader-small"></span>
+              ) : (
+                <svg xmlns="http://www.w3.org/2000/svg" className="btn-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                </svg>
+              )}
+              {isExporting ? "Exportando..." : "Exportar CSV"}
             </button>
 
             {/* Gerar Crachás dos Selecionados */}
             <button
               className="btn-primary btn-with-icon btn-badge-primary"
               onClick={() => handleGenerateBadges(true)}
-              disabled={selectedIds.size === 0}
+              disabled={selectedIds.size === 0 || isGeneratingBadges}
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="btn-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.333 0 4 .667 4 2v1H5v-1c0-1.333 2.667-2 4-2z" />
-              </svg>
+              {isGeneratingBadges ? (
+                <span className="spinner-loader-small"></span>
+              ) : (
+                <svg xmlns="http://www.w3.org/2000/svg" className="btn-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.333 0 4 .667 4 2v1H5v-1c0-1.333 2.667-2 4-2z" />
+                </svg>
+              )}
               Crachás Selecionados ({selectedIds.size})
             </button>
 
@@ -960,11 +993,15 @@ export default function AdminDashboard({
             <button
               className="btn-outline btn-with-icon"
               onClick={() => handleGenerateBadges(false)}
-              disabled={totalFiltered === 0}
+              disabled={totalFiltered === 0 || isGeneratingBadges}
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="btn-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-              </svg>
+              {isGeneratingBadges ? (
+                <span className="spinner-loader-small"></span>
+              ) : (
+                <svg xmlns="http://www.w3.org/2000/svg" className="btn-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                </svg>
+              )}
               Crachás Todos ({totalFiltered})
             </button>
           </div>

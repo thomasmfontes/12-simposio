@@ -52,34 +52,19 @@ export async function GET(request: Request) {
       countQuery = countQuery.lte("dt_cadastro", lteVal);
     }
 
-    // Ordenação e paginação
-    if (isAll) {
-      queryBuilder = queryBuilder.order("dt_cadastro", { ascending: false }).range(0, 9999);
-    } else {
-      const offset = (page - 1) * limit;
-      queryBuilder = queryBuilder.order("dt_cadastro", { ascending: false }).range(offset, offset + limit - 1);
-    }
+    // 3. Contagem exata dos filtrados e estatísticas gerais
+    const [{ count: filteredCount, error: countFilteredError }, totalRes, presencialRes, onlineRes] =
+      await Promise.all([
+        countQuery,
+        db.from("t_inscritos").select("*", { count: "exact", head: true }),
+        db.from("t_inscritos").select("*", { count: "exact", head: true }).eq("ds_modalidade", "Presencial"),
+        db.from("t_inscritos").select("*", { count: "exact", head: true }).eq("ds_modalidade", "Online"),
+      ]);
 
-    // Executa requisição dos dados e contagem filtrada em paralelo
-    const [{ data: inscritos, error: fetchError }, { count: filteredCount, error: countFilteredError }] =
-      await Promise.all([queryBuilder, countQuery]);
-
-    if (fetchError) {
-      console.error("Erro ao buscar inscritos no Supabase:", fetchError);
-      throw fetchError;
-    }
     if (countFilteredError) {
       console.error("Erro ao contar inscritos filtrados no Supabase:", countFilteredError);
       throw countFilteredError;
     }
-
-    // 3. Estatísticas Gerais (não afetadas pelos filtros da tabela)
-    const [totalRes, presencialRes, onlineRes] = await Promise.all([
-      db.from("t_inscritos").select("*", { count: "exact", head: true }),
-      db.from("t_inscritos").select("*", { count: "exact", head: true }).eq("ds_modalidade", "Presencial"),
-      db.from("t_inscritos").select("*", { count: "exact", head: true }).eq("ds_modalidade", "Online"),
-    ]);
-
     if (totalRes.error) throw totalRes.error;
     if (presencialRes.error) throw presencialRes.error;
     if (onlineRes.error) throw onlineRes.error;
@@ -88,20 +73,83 @@ export async function GET(request: Request) {
     const presencialCount = presencialRes.count || 0;
     const onlineCount = onlineRes.count || 0;
     const totalFiltered = filteredCount || 0;
+
+    // 4. Busca de dados (paginada ou completa em lotes/chunks para contornar o limite de 1000 do Supabase)
+    let inscritos: any[] = [];
+
+    if (isAll) {
+      if (totalFiltered > 0) {
+        const CHUNK_SIZE = 1000;
+        const totalChunks = Math.ceil(totalFiltered / CHUNK_SIZE);
+        const chunkPromises = [];
+
+        for (let i = 0; i < totalChunks; i++) {
+          const from = i * CHUNK_SIZE;
+          const to = from + CHUNK_SIZE - 1;
+
+          let chunkQuery = db.from("t_inscritos").select("*");
+          if (q.trim()) {
+            const filterStr = `nm_inscrito.ilike.%${q.trim()}%,ds_email.ilike.%${q.trim()}%`;
+            chunkQuery = chunkQuery.or(filterStr);
+          }
+          if (cidade.trim()) {
+            chunkQuery = chunkQuery.eq("nm_cidade", cidade.trim());
+          }
+          if (modalidade.trim()) {
+            chunkQuery = chunkQuery.eq("ds_modalidade", modalidade.trim());
+          }
+          if (dataInicio) {
+            const gteVal = `${dataInicio}T00:00:00.000Z`;
+            chunkQuery = chunkQuery.gte("dt_cadastro", gteVal);
+          }
+          if (dataFim) {
+            const lteVal = `${dataFim}T23:59:59.999Z`;
+            chunkQuery = chunkQuery.lte("dt_cadastro", lteVal);
+          }
+
+          chunkPromises.push(
+            chunkQuery.order("dt_cadastro", { ascending: false }).range(from, to)
+          );
+        }
+
+        const chunkResults = await Promise.all(chunkPromises);
+        for (const res of chunkResults) {
+          if (res.error) throw res.error;
+          if (res.data) inscritos.push(...res.data);
+        }
+      }
+    } else {
+      const offset = (page - 1) * limit;
+      const { data: pageData, error: pageError } = await queryBuilder
+        .order("dt_cadastro", { ascending: false })
+        .range(offset, offset + limit - 1);
+
+      if (pageError) throw pageError;
+      inscritos = pageData || [];
+    }
+
     const totalPages = isAll ? 1 : Math.max(1, Math.ceil(totalFiltered / limit));
 
-    // 4. Lista de cidades distintas para preencher o filtro do painel
-    const { data: allCities, error: citiesError } = await db
-      .from("t_inscritos")
-      .select("nm_cidade");
-
-    if (citiesError) {
-      console.error("Erro ao buscar lista de cidades no Supabase:", citiesError);
-      throw citiesError;
+    // 5. Lista de cidades distintas buscando todos os registros em lotes se necessário
+    const cityChunks = Math.ceil(totalCount / 1000) || 1;
+    const cityPromises = [];
+    for (let i = 0; i < cityChunks; i++) {
+      cityPromises.push(
+        db
+          .from("t_inscritos")
+          .select("nm_cidade")
+          .range(i * 1000, (i + 1) * 1000 - 1)
+      );
+    }
+    const cityResults = await Promise.all(cityPromises);
+    const allCities: { nm_cidade: string }[] = [];
+    for (const res of cityResults) {
+      if (res.error) throw res.error;
+      if (res.data) allCities.push(...res.data);
     }
 
     const cidades = Array.from(
-      new Set((allCities || []).map((c: { nm_cidade: string }) => c.nm_cidade))
+      new Set(allCities.map((c) => c.nm_cidade).filter(Boolean))
     ).sort();
 
     return NextResponse.json({

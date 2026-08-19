@@ -65,6 +65,7 @@ export default function AdminLogin() {
             )}
 
             <form
+              method="POST"
               onSubmit={handleSubmit}
               style={{ display: "flex", flexDirection: "column", gap: "18px" }}
             >
